@@ -5,7 +5,7 @@
 #include <vector>
 #include <unordered_map>
 #include <functional>
-#include <BencodeValue.hpp>
+#include <bencode/BencodeValue.hpp>
 
 class BencodeDecoder
 {

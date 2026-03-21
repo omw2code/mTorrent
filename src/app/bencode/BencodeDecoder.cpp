@@ -1,6 +1,6 @@
 #include <fstream>
 #include <iostream>
-#include "BencodeDecoder.hpp"
+#include <bencode/BencodeDecoder.hpp>
 
 
 BencodeDecoder::BencodeDecoder()
