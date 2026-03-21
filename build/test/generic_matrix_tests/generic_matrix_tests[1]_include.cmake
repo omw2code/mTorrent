@@ -1,0 +1,5 @@
+if(EXISTS "/Users/brennanr7/workarea/Cpp-Fun/build/test/generic_matrix_tests/generic_matrix_tests[1]_tests.cmake")
+  include("/Users/brennanr7/workarea/Cpp-Fun/build/test/generic_matrix_tests/generic_matrix_tests[1]_tests.cmake")
+else()
+  add_test(generic_matrix_tests_NOT_BUILT generic_matrix_tests_NOT_BUILT)
+endif()
