@@ -1,6 +1,9 @@
 
 #include <openssl/sha.h>
-#include "Dht.h"
+#include "Dht.hpp"
+
+namespace protocol
+{
 
 DHT::DHT()
 {
@@ -11,3 +14,5 @@ void DHT::generateUid()
 {
     SHA1()
 }
+
+}; /// namespace protocol

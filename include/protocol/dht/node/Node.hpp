@@ -1,6 +1,7 @@
 #ifndef _NODE_HPP_
 #define _NODE_HPP_
 
+#include <stack>
 #include <unordered_map>
 
 namespace protocol
@@ -13,7 +14,7 @@ namespace dht
 class Node
 {
 public:
-    Node() = default;
+    Node();
 
 private:
 

@@ -1,4 +1,4 @@
-#include <Node.hpp>
+#include <protocol/dht/node/Node.hpp>
 
 namespace protocol
 {
@@ -6,7 +6,7 @@ namespace dht
 {
 
 Node::Node()
-    : uuid{}
+    : uuid_{}
     , routing_table_{}
 {
     /// generate the unique id at random from 

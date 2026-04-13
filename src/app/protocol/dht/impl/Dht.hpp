@@ -2,7 +2,7 @@
 #define _DHT_HPP_
 
 #include <map>
-#include <Node.hpp>
+#include <protocol/dht/node/Node.hpp>
 
 namespace protocol
 {
@@ -24,7 +24,7 @@ private:
 
     struct NodeInfo
     {
-        Node node;
+        dht::Node node;
         std::string uid;
     };        
 

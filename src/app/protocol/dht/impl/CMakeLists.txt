@@ -6,4 +6,4 @@ target_sources( dht
   RoutingTable.cpp
   )
 
-target_link_libraries(dht PRIVATE libssl)
+target_link_libraries(dht PRIVATE OpenSSL::SSL node)
