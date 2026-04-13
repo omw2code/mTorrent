@@ -1,8 +1,10 @@
 # Create the target
-add_executable( bencode )
+add_library(bencode)
 
 target_sources(bencode
   PRIVATE
   BencodeDecoder.cpp)
 
-target_link_libraries(bencode PUBLIC include)
+target_include_directories(bencode
+  PUBLIC
+  $<BUILD_INTERFACE:${INCLUDE_DIR}>)

@@ -6,12 +6,7 @@
 BencodeDecoder::BencodeDecoder()
     : torrent_()
     , pos_(0)
-{
-    handler_.emplace('i',     [&](){ handleInt(); });
-    handler_.emplace('l',     [&](){ handleList(); });
-    handler_.emplace('d',     [&](){ handleDict(); });
-    handler_.emplace(':',     [&](){ handleString(); });
-}
+{}
 
 void BencodeDecoder::readTorrent(const std::string &filename)
 {
@@ -149,9 +144,9 @@ BencodeValue BencodeDecoder::handleDict()
     BencodeValue::BencodeDict dict;
     while(pos_ < buffer_.size() && buffer_[pos_] != 'e')
     {
-        auto key = dispatch().value;
+        auto key = std::get<std::string>(dispatch().value);
         auto val = dispatch();
-        dict[key] = val;
+        decode_dict_[key] = val;
     }
     return BencodeValue(std::move(dict));
 }

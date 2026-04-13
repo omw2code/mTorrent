@@ -14,13 +14,19 @@ namespace protocol
 class DHT
 {
 public: 
-    DHT() = default;
+    DHT();
+
+private:
+    
+    void generateUid();
 
 private:
 
     struct NodeInfo
     {
-        
+        Node node;
+        std::string uid;
+    };        
 
 };
 

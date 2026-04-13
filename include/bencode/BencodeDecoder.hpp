@@ -3,18 +3,27 @@
 
 #include <string>
 #include <vector>
-#include <unordered_map>
+#include <map>
 #include <functional>
 #include <bencode/BencodeValue.hpp>
 
 class BencodeDecoder
 {
 public:
+
+    using BencodeList = std::vector<BencodeValue>;
+    using BencodeDict = std::map<std::string, BencodeValue>;
+    using variant_type = std::variant<
+        int64_t,
+        std::string,
+        BencodeList,
+        BencodeDict>;
+
     BencodeDecoder();
     
     void setTorrent(const std::string &filename);
 
-    BencodeValue BencodeDecoder::dispatch();
+    BencodeValue dispatch();
 
 private:
     /**
@@ -76,9 +85,9 @@ private:
 
     /// The length of the decoded string type
     int str_len_;
-
-    /// Byte handler for parsing
-    std::unordered_map<uint8_t, std::function<void()>> handler_;
+    
+    /// A dictionary of decoded bencode data
+    std::map<std::string, BencodeValue> decode_dict_;
 };
 
 #endif
