@@ -7,7 +7,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Required libraries
 find_package(OpenSSL REQUIRED)
-
+find_package(nlohmann_json REQUIRED)
 # Set up general include for generator expressions
 set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 

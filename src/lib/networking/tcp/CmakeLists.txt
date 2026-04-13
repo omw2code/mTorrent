@@ -1,0 +1,6 @@
+add_library(tcp_lib)
+
+target_sources(tcp_lib
+  PRIVATE
+  TcpClient.cpp
+  )

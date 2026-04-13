@@ -26,7 +26,7 @@ private:
     {
         dht::Node node;
         std::string uid;
-    };        
+    };
 
 };
 

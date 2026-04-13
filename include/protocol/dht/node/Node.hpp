@@ -17,7 +17,6 @@ public:
     Node();
 
 private:
-
     uint8_t generateUid();
 
 private:
@@ -26,8 +25,7 @@ private:
         uint8_t id;
         uint8_t distance;
     };
-
-
+    
     /// Routing table containing the contact info for a small
     /// number of other nodes
     std::unordered_map<uint8_t, ContactInfo> routing_table_;
@@ -40,7 +38,7 @@ private:
     /// that are far away
     std::stack<ContactInfo> far_;
     /// The unique id of this 
-    uint8_t uuid_;
+    std::string uuid_;
 };
 
 } /// namespace dht

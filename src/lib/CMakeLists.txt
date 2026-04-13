@@ -1,1 +1,4 @@
 add_subdirectory(generic_matrix)
+add_subdirectory(json_parser)
+add_subdirectory(networking/tcp)
+add_subdirectory(networking/udp)

@@ -1,3 +1,4 @@
+#include <openssl/sha.h>
 #include <protocol/dht/node/Node.hpp>
 
 namespace protocol
@@ -16,7 +17,7 @@ Node::Node()
 
 uint8_t Node::generateUid()
 {
-
+    // return SHA256()
 }
 
 } /// namespace dht

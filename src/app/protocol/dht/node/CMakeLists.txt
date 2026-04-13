@@ -8,3 +8,5 @@ target_sources(node
 target_include_directories(node
   PUBLIC
   $<BUILD_INTERFACE:${INCLUDE_DIR}>)
+
+target_link_libraries(node PRIVATE OpenSSL::SSL)
