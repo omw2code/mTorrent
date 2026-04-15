@@ -1,2 +1,3 @@
 add_subdirectory(generic_matrix_tests)
+add_subdirectory(json_parser_tests)
 add_subdirectory(bencode_tests)

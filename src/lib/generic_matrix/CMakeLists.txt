@@ -1,6 +1,5 @@
 add_library(generic_matrix INTERFACE)
 
-
 target_sources( generic_matrix
   INTERFACE
     FILE_SET HEADERS
