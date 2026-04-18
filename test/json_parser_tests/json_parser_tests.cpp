@@ -7,21 +7,21 @@
 TEST(JsonParsing, getValidJsonValueTest)
 {
     const std::string_view json_str = R"({
-        \"BitTorrent\":
+        "BitTorrent":
         {
-            \"TCP\": {
-                \"port\": 8080,
-                \"ip\": \"192.168.1.5\"
+            "TCP": {
+                "port": 8080,
+                "ip": "192.168.1.5"
             },
-            \"UDP\":{
-                \"port\": 8080,
-                \"ip\": \"192.168.1.5\"
+            "UDP":{
+                "port": 8080,
+                "ip": "192.168.1.5"
             }
         }
     })";
 
     JsonParser parser(json_str);
-    auto actual = parser.getJsonValue<int>("BitTorrent/TCP/port");
+    int actual = parser.getJsonValue<int>("BitTorrent/TCP/port");
 
     ASSERT_EQ(actual, 8080);
 }
@@ -29,21 +29,25 @@ TEST(JsonParsing, getValidJsonValueTest)
 TEST(JsonParsing, getValidJsonArrayTest)
 {
     const std::string_view json_str = R"({
-        \"BitTorrent\":
+        "BitTorrent":
         {
-            \"TCP\": {
-                \"port\": 8080,
-                \"ip\": \"192.168.1.5\"
+            "TCP": {
+                "port": 8080,
+                "ip": "192.168.1.5"
             },
-            \"UDP\":{
-                \"port\": 8080,
-                \"ip\": \"192.168.1.5\"
+            "UDP":{
+                "port": 8080,
+                "ip": "192.168.1.5"
             }
         }
     })";
 
+    /// Init the parser, grab the array
     JsonParser parser(json_str);
     auto actual_map = parser.getJsonArray<int, std::string>("BitTorrent/TCP");
+    
+    /// Asserts for the tests 
+    ASSERT_EQ(actual_map.size(), 2);
     for (const auto &[key, val] : actual_map)
     {
         if constexpr (std::is_same<decltype(val), int>::value)

@@ -46,6 +46,10 @@ std::queue<std::string> JsonParser::tokenize(std::string &str, const std::string
         str.erase(0, pos + delim.length());
     }
     
+    /// Edge case for non objects
+    if (!str.empty())
+        tokens.push(str);
+
     // Elided
     return tokens;
 }

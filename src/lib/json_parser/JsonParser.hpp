@@ -1,6 +1,7 @@
 #ifndef __JSON_PARSER_HPP__
 #define __JSON_PARSER_HPP__
 
+#include <iostream>
 #include <variant>
 #include <string_view>
 #include <unordered_map>
@@ -16,11 +17,10 @@ public:
     template<typename T>
     T getJsonValue(std::string key_path, std::string delim="/")
     {
-        std::queue<std::string> tokens = tokenize(key_path, delim);
         nlohmann::json *node = findNode(&json_, key_path, delim);
-
         if (node == nullptr || node->is_object())
         {
+            std::cerr << "DEBUG: node is nullptr or is an object\n";
             /// using the wrong api to get a list of values
             return T{};
         }
@@ -42,17 +42,10 @@ public:
             return {};
         }
 
-        try
+        /// Fill out the map
+        for (const auto &[key, val] : node->items())
         {
-            /// Fill out the map
-            for (const auto &[key, val] : node->items())
-            {
-                kvp_map.emplace(key, make_variant<Variant, Args...>(val));
-            }
-        }
-        catch(...)
-        {
-            throw std::runtime_error("Error: Invalid type found but not specified in parameter pack");
+            kvp_map.emplace(key, make_variant<Variant, Args...>(val));
         }
         
         /// return json kvp map
