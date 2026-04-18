@@ -19,6 +19,22 @@ JsonParser::JsonParser(const std::string_view &literal)
     if (json_.is_discarded())
         throw std::runtime_error("Error invalid json string literal");
 }
+nlohmann::json* JsonParser::findNode(nlohmann::json *node, std::string &key_path, std::string &delim)
+{
+    std::queue<std::string> tokens = tokenize(key_path, delim);
+    while (!tokens.empty())
+    {
+        auto token = tokens.front();
+        tokens.pop();
+        if (!node->contains(token))
+        {
+            return nullptr;
+        }
+        node = &(*node)[token];
+    }
+    return node;
+}
+
 
 std::queue<std::string> JsonParser::tokenize(std::string &str, const std::string delim)
 {

@@ -17,20 +17,9 @@ public:
     T getJsonValue(std::string key_path, std::string delim="/")
     {
         std::queue<std::string> tokens = tokenize(key_path, delim);
-        nlohmann::json *node = &json_;
-        while (!tokens.empty())
-        {
-            auto search_key = tokens.front();
-            tokens.pop();
-            if (!node->contains(search_key))
-            {
-                /// Never going to find the value;
-                return T{};
-            }
-            node = &(*node)[search_key];
-        }
+        nlohmann::json *node = findNode(&json_, key_path, delim);
 
-        if (node->is_array())
+        if (node == nullptr || node->is_object())
         {
             /// using the wrong api to get a list of values
             return T{};
@@ -45,21 +34,10 @@ public:
     std::unordered_map<std::string, std::variant<Args...>> 
     getJsonArray(std::string key_path, std::string delim="/")
     {
-        std::unordered_map<std::string, std::variant<Args...>> kvp_map{};
-        std::queue<std::string> tokens = tokenize(key_path, delim);
-        nlohmann::json *node = &json_;
-        while (!tokens.empty())
-        {
-            auto token = tokens.front();
-            tokens.pop();
-            if (!node->contains(token))
-            {
-                return {};
-            }
-            node = &(*node)[token];
-        }
-
-        if (!node->is_object() && !node->is_array())
+        using Variant = std::variant<Args...>;
+        std::unordered_map<std::string, Variant> kvp_map{};
+        nlohmann::json *node = findNode(&json_, key_path, delim);
+        if (node == nullptr && !node->is_array() || !node->is_object())
         {
             return {};
         }
@@ -69,7 +47,7 @@ public:
             /// Fill out the map
             for (const auto &[key, val] : node->items())
             {
-                kvp_map.emplace(key, std::variant<decltype(val.type())>(val.get<decltype(val.type())>()));
+                kvp_map.emplace(key, make_variant<Variant, Args...>(val));
             }
         }
         catch(...)
@@ -77,10 +55,42 @@ public:
             throw std::runtime_error("Error: Invalid type found but not specified in parameter pack");
         }
         
+        /// return json kvp map
         return kvp_map;
     }
 
 private:
+    template<typename Variant, typename T>
+    bool canAssign(Variant &variant, const nlohmann::json &node)
+    {
+        try
+        {
+            variant = node.get<T>();
+        }
+        catch(...)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    template<typename Variant, typename... Args>
+    std::variant<Args...> make_variant(const nlohmann::json &node)
+    {
+        /// Check whether we can grab and assign the type to our variant types
+        Variant variant;
+        if (!(canAssign<Variant, Args>(variant, node) || ...))
+        {
+            throw std::runtime_error("Error could not assign json underlying type to specified variant types");
+        }
+
+        return variant;
+    }
+
+private:
+
+    nlohmann::json* findNode(nlohmann::json *node, std::string &key_path, std::string &delim);
+
     std::queue<std::string>  tokenize(std::string &str, const std::string delim);
 
     const std::string_view filename_;
