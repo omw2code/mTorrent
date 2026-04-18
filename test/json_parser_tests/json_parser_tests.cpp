@@ -20,6 +20,5 @@ TEST(JsonParsing, getValidStringTest)
     })";
 
     JsonParser parser(json_str);
-    std::string_view tcp_str{"TCP"};
-    auto val = parser.getValue<std::string>(tcp_str);
+    auto val = parser.getJsonValue<std::string>("BitTorrent/TCP/port");
 }
