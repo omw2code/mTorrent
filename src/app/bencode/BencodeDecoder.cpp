@@ -30,8 +30,7 @@ BencodeValue BencodeDecoder::dispatch()
         throw std::runtime_error("Unexpected end of buffer");
 
     // Iterate through the buffer
-    char c;
-    c = buffer_[pos_];
+    char c = buffer_[pos_];
     switch (c)
     {
     case 'i':

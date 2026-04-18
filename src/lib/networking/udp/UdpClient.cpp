@@ -2,6 +2,8 @@
 
 namespace network
 {
+namespace udp
+{
 
 UDP::UDP()
     : peer_identifier_{
@@ -34,5 +36,5 @@ void UDP::loadSettings()
 }
 
 
-
+}; /// namespace udp
 }; /// namespace network

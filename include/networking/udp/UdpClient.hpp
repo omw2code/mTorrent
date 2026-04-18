@@ -6,6 +6,8 @@
 
 namespace network
 {
+namespace udp
+{
 
 class UDP
 {
@@ -24,6 +26,7 @@ private:
     std::vector<uint8_t> flags_;
 };
 
+}; /// namespace udp
 }; /// namespace network
 
 #endif

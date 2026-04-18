@@ -3,4 +3,11 @@ add_library(tcp_lib)
 target_sources(tcp_lib
   PRIVATE
   TcpClient.cpp
+  TcpServer.cpp
+  )
+
+target_include_directories( tcp_lib 
+  PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+  $<INSTALL_INTERFACE:include>
   )
