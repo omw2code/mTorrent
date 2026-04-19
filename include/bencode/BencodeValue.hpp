@@ -7,6 +7,9 @@
 #include <string>
 #include <unordered_map>
 
+namespace bittorrent
+{
+
 class BencodeValue
 {
 public:
@@ -26,5 +29,7 @@ public:
     BencodeValue(BencodeList list) : value(std::move(list)) {};
     BencodeValue(BencodeDict dict) : value(std::move(dict)) {};
 };
+
+}; /// namespace bittorrent
 
 #endif

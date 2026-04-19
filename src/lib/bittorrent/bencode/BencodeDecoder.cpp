@@ -2,6 +2,8 @@
 #include <iostream>
 #include <bencode/BencodeDecoder.hpp>
 
+namespace bittorrent
+{
 
 BencodeDecoder::BencodeDecoder()
     : torrent_()
@@ -117,7 +119,7 @@ BencodeValue BencodeDecoder::handleList()
 {
     // Move pas 'l'
     ++pos_;
-    BencodeValue::BencodeList list;
+   BencodeValue::BencodeList list;
     while (pos_ < buffer_.size() && buffer_[pos_] != 'e')
     {
         list.push_back(dispatch());
@@ -154,3 +156,5 @@ void BencodeDecoder::setTorrent(const std::string &filename)
 {
     torrent_ = filename;
 }
+
+}; /// namespace bittorrent

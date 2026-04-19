@@ -11,7 +11,7 @@
 class JsonParser
 {
 public:
-    JsonParser(std::ifstream &fs);
+    JsonParser(std::string &filename);
     JsonParser(const std::string_view &literal);
     
     template<typename T>

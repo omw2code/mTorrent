@@ -1,4 +1,4 @@
-#include "UdpClient.hpp"
+#include <networking/udp/UdpClient.hpp>
 
 namespace network
 {

@@ -2,7 +2,7 @@
 #include <string>
 #include <type_traits>
 #include <gtest/gtest.h>
-#include <JsonParser.hpp>
+#include <json_parser/JsonParser.hpp>
 
 TEST(JsonParsing, getValidJsonValueTest)
 {

@@ -7,6 +7,9 @@
 #include <functional>
 #include <bencode/BencodeValue.hpp>
 
+namespace bittorrent
+{
+
 class BencodeDecoder
 {
 public:
@@ -38,7 +41,7 @@ private:
      * 
      * \param str Bencoded string
      */
-    BencodeValue handleString();
+   BencodeValue handleString();
     
     /**
      * \brief Decode bencoded integral types
@@ -68,7 +71,7 @@ private:
      */
     bool consumeUntil(const char delimiter);
 
-    BencodeValue parse();
+   BencodeValue parse();
 
 private:
     /// The torrent file
@@ -90,4 +93,5 @@ private:
     std::map<std::string, BencodeValue> decode_dict_;
 };
 
+}; /// namespace bittorrent
 #endif

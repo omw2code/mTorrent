@@ -4,10 +4,11 @@
 #include <ranges>
 #include <string_view>
 #include <nlohmann/json.hpp>
-#include "JsonParser.hpp"
+#include <json_parser/JsonParser.hpp>
 
-JsonParser::JsonParser(std::ifstream &fs)
+JsonParser::JsonParser(std::string &filename)
 {
+    std::ifstream fs(filename);
     /// Read in and initialize the json object
     fs >> json_;
 }

@@ -1,29 +1,96 @@
-#include <iostream>
+#include <stdio.h>
 #include <cerrno>
-#include <sys/socket.h>
 #include <sys/types.h>
+#include <arpa/inet.h>
 #include <netdb.h>
 #include <networking/tcp/TcpServer.hpp>
+#include <json_parser/JsonParser.hpp>
 
 namespace networking::tcp
 {
 
-TcpServer::TcpServer()
-{}
-
-void TcpServer::listen()
+TcpServer::TcpServer(const std::string& filename)
+    : hint_{}
+    , socket_{}
+    , config_{filename}
 {
-    int listening = socket(AF_INET, SOCK_STREAM, 0);
-    if (listening == -1)
+    init();
+}
+
+void TcpServer::init()
+{
+    /// Json helper
+    JsonParser parser{config_};
+    auto settings = parser.getJsonArray<std::string, int>("BitTorrent/tcp/server");
+
+    /// Grab initial networking configuration
+    auto addr_it = settings.find("ip");
+    if (addr_it == settings.end())
     {
-        /// Lets print some human readable error
-        std::cerr << "Error creating socket: " << std::strerror(errno) << "\n";
+        throw std::runtime_error("Error: No network address configured");
     }
 
-    /// Bind the socket to a port
-    sockaddr_in hint;
-    hint.sin_family = AF_INET;
+    /// Make sure any isn't configured
+    if (std::strcmp(std::get<std::string>(addr_it->second).c_str(), "any") == 0)
+    {
+        throw std::runtime_error("Error, \"any\" address not supported for TCP Server");
+    }
 
+    auto port_it = settings.find("port");
+    if (port_it == settings.end())
+    {
+        throw std::runtime_error("Error: No network port configured");
+    }
+
+    /// Make sure any isn't configured
+    if (std::strcmp(std::get<std::string>(port_it->second).c_str(), "any") == 0)
+    {
+        throw std::runtime_error("Error, \"any\" port not supported for TCP Server");
+    }
+
+    /// Grab the port
+    int sin_port = std::stoi(std::get<std::string>(port_it->second));
+    
+    /// IPv4 only supported as of 4/19/26
+    bzero(&hint_, sizeof(hint_));
+    hint_.sin_family = AF_INET;
+    hint_.sin_port = htons(sin_port);
+
+    if ((inet_pton(AF_INET, std::get<std::string>(addr_it->second).c_str(), &hint_.sin_addr)) == 0)
+    {
+        throw std::runtime_error("Error converting address to network format");
+    }
+}
+
+void TcpServer::socketInit()
+{
+    /// Init a fd
+    socket_ = socket(AF_INET, SOCK_STREAM, 0);
+    if (socket_ == -1)
+    {
+        /// Lets print some human readable error
+        std::string error{"Error creating socket: "};
+        error.append(std::strerror(errno));
+        throw std::runtime_error(error);
+    }
+
+    /// Bind the socket to an ip and port
+    if (bind(socket_,(sockaddr*)&hint_, sizeof(hint_)) == -1)
+    {
+        ::close(socket_);
+        std::string error{"Error binding to socket"};
+        error.append(std::strerror(errno));
+        throw std::runtime_error(error);
+    }
+
+    /// listen on a socket with a max connections
+    if (::listen(socket_, SOMAXCONN) == -1)
+    {
+        ::close(socket_);
+        std::string error{"Error unable to listen on the socket"};
+        error.append(std::strerror(errno));
+        throw std::runtime_error(error);
+    }
 }
 
 };

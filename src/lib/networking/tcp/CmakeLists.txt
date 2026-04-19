@@ -6,8 +6,12 @@ target_sources(tcp_lib
   TcpServer.cpp
   )
 
-target_include_directories( tcp_lib 
+target_include_directories(tcp_lib 
   PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-  $<INSTALL_INTERFACE:include>
+  $<BUILD_INTERFACE:${INCLUDE_DIR}>
+  )
+
+target_link_libraries(tcp_lib
+  PRIVATE
+  json_parser
   )
