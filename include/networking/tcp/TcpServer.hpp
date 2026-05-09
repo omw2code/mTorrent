@@ -17,7 +17,7 @@ public:
 
 private:
     void init();
-    void socketInit();
+    void serverStart();
     void listen();
     void connect();
     void disconnect();

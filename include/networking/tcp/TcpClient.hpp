@@ -15,9 +15,10 @@ class TcpClient
 {
 public:
     TcpClient(const std::string &filename);
-    bool create();
+
 private:
     void init();
+    void socketStart();
     void connect();
     void disconnect();
 private:

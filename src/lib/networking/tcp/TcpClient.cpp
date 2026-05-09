@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <cerrno>
 #include <sys/types.h>
+#include <unistd.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <networking/tcp/TcpClient.hpp>
@@ -67,11 +68,10 @@ void TcpClient::init()
     }
 }
 
-bool TcpClient::create()
+void TcpClient::socketStart()
 {
-    /// Create the client
+    /// Init a fd
     socket_ = socket(AF_INET, SOCK_STREAM, 0);
-
     if (socket_ == -1)
     {
         /// Lets print some human readable error
@@ -80,7 +80,15 @@ bool TcpClient::create()
         throw std::runtime_error(error);
     }
 
-    return true;
+    /// Bind the socket to an ip and port
+    if (bind(socket_,(sockaddr*)&hint_, sizeof(hint_)) == -1)
+    {
+        ::close(socket_);
+        std::string error{"Error binding to socket"};
+        error.append(std::strerror(errno));
+        throw std::runtime_error(error);
+    }
+
 }
 
 }; /// namespace tcp
