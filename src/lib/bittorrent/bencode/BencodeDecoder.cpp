@@ -7,7 +7,12 @@ namespace bittorrent
 
 BencodeDecoder::BencodeDecoder()
     : torrent_()
-    , pos_(0)
+    , pos_{}
+{}
+
+BencodeDecoder::BencodeDecoder(std::string_view &torrent)
+    : buffer_(torrent.begin(), torrent.end())
+    , pos_{}
 {}
 
 void BencodeDecoder::readTorrent(const std::string &filename)

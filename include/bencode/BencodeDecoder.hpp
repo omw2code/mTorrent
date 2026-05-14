@@ -23,8 +23,12 @@ public:
         BencodeDict>;
 
     BencodeDecoder();
+
+    BencodeDecoder(std::string_view &torrent);
     
     void setTorrent(const std::string &filename);
+
+    void setTorrent(const std::string_view &torrent);
 
     BencodeValue dispatch();
 
