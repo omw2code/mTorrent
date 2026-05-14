@@ -14,6 +14,6 @@ set(JSON_ImplicitConversions OFF)
 set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Traverse the rest of the project
-add_subdirectory(third_party)
+add_subdirectory(external)
 add_subdirectory(src)
 add_subdirectory(test)

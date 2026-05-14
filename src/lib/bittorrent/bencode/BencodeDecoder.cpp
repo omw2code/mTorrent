@@ -10,7 +10,7 @@ BencodeDecoder::BencodeDecoder()
     , pos_{}
 {}
 
-BencodeDecoder::BencodeDecoder(std::string_view &torrent)
+BencodeDecoder::BencodeDecoder(const std::string_view &torrent)
     : buffer_(torrent.begin(), torrent.end())
     , pos_{}
 {}

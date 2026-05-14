@@ -24,7 +24,7 @@ public:
 
     BencodeDecoder();
 
-    BencodeDecoder(std::string_view &torrent);
+    BencodeDecoder(const std::string_view &torrent);
     
     void setTorrent(const std::string &filename);
 
