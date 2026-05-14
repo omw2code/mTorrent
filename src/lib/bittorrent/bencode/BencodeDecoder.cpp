@@ -75,13 +75,17 @@ BencodeValue BencodeDecoder::handleString()
     }
     
     if (pos_ >- buffer_.size() || buffer_[pos_] != ':')
+    {
         throw std::runtime_error("Malformed string type");
+    }
     
     // Skip ':'
     ++pos_;
     
     if (pos_ + str_len_ > buffer_.size())
+    {
         throw std::runtime_error("String length exceeds buffer size");
+    }
 
     // Grab the string
     std::string str;
@@ -108,11 +112,15 @@ BencodeValue BencodeDecoder::handleInt()
     
     // Check bounds
     if (pos_ >= buffer_.size())
+    {
         throw std::runtime_error("Int exceeds buffer size");
+    }
 
     // Ensure the data was fully read
     if (buffer_[pos_] != 'e')
+    {
         std::runtime_error("Malformed int type");
+    }
     
     // Advance position
     ++pos_;
@@ -132,10 +140,14 @@ BencodeValue BencodeDecoder::handleList()
     }
     
     if (pos_ >= buffer_.size())
+    {
         throw std::runtime_error("Unexpected end of buffer when parsing list");
+    }
     
     if (buffer_[pos_] != 'e')
+    {
         throw std::runtime_error("Malformed list type");
+    }
 
     // Advance position
     ++pos_;
