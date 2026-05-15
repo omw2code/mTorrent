@@ -58,3 +58,14 @@ TEST(BecondeDecoderInt, DecodeInvalidInt)
     decoder.setBencode(bencode_uInt);
     EXPECT_THROW(decoder.dispatch(), std::runtime_error);
 }
+
+
+TEST(BencodeDecoderInt, DecodeLargeInt)
+{
+    constexpr std::string_view bencode_int{"i1000000000000"};
+    bittorent::BencodeDecoder decoder{};
+    decoder.setBencode(bencode_int);
+    auto val = decoder.dispatch();
+
+    ASSERT_EQ(std::get<int64_t>(val.value), bencode_int);
+}
