@@ -28,7 +28,7 @@ public:
     
     void setTorrent(const std::string &filename);
 
-    void setTorrent(const std::string_view &torrent);
+    void setBencode(const std::string_view &beconde);
 
     BencodeValue dispatch();
 

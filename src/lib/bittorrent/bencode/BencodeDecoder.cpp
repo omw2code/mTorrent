@@ -102,11 +102,27 @@ BencodeValue BencodeDecoder::handleInt()
 {
     // Move past 'i'
     ++pos_;
-    int num = 0;
-    while (pos_ < buffer_.size() &&
-           std::isdigit(static_cast<unsigned char>(buffer_.at(pos_))))
+    int num{0};
+
+    /// Check for signess 
+    bool sign{false};
+    if (pos_ < buffer_.size() && buffer_[pos_] == '-')
     {
-        num = (num * 10) + (buffer_.at(pos_) - '0');
+        sign = true;
+        ++pos_;
+    }
+
+    bool leading_zero{false};
+    while (pos_ < buffer_.size() &&
+           std::isdigit(static_cast<unsigned char>(buffer_[pos_])))
+    {
+        /// Check if there was a leading zero
+        if (leading_zero)
+        {
+            throw std::runtime_error("Invalid integer, leading zero integers are invalid");
+        }
+        num = (num * 10) + (buffer_[pos_] - '0');
+        leading_zero = num == 0;
         ++pos_;
     }
     
@@ -125,7 +141,7 @@ BencodeValue BencodeDecoder::handleInt()
     // Advance position
     ++pos_;
 
-    return BencodeValue(num);
+    return BencodeValue(sign ? -1 * num : num);
 }
 
 BencodeValue BencodeDecoder::handleList()
@@ -172,6 +188,12 @@ BencodeValue BencodeDecoder::handleDict()
 void BencodeDecoder::setTorrent(const std::string &filename)
 {
     torrent_ = filename;
+}
+
+void BencodeDecoder::setBencode(const std::string_view &bencode)
+{
+    buffer_.assign(bencode.begin(), bencode.end());
+    pos_ = 0;
 }
 
 }; /// namespace bittorrent
