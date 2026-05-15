@@ -8,7 +8,8 @@ TEST(BencodeDecoderString, DecodeString)
 {
     /// Set up the thing we want to decode
     constexpr std::string_view bencode_int{"9:the_thing"};
-    bittorrent::BencodeDecoder decoder(bencode_int);
+    bittorrent::BencodeDecoder decoder{};
+    decoder.setBencode(bencode_int);
 
     /// Decode the thing
     auto val = decoder.dispatch();
@@ -25,7 +26,8 @@ TEST(BencodeDecoderString, DecodeString)
 TEST(BecondeDecoderInt, DecodeInt)
 {
     constexpr std::string_view bencode_uInt{"i3e"};
-    bittorrent::BencodeDecoder decoder{bencode_uInt};
+    bittorrent::BencodeDecoder decoder{};
+    decoder.setBencode(bencode_uInt);
 
     /// Check i3e
     auto val = decoder.dispatch();
@@ -36,7 +38,8 @@ TEST(BecondeDecoderInt, DecodeInt)
 TEST(BecondeDecoderInt, DecodeNegative)
 {
     constexpr std::string_view bencode_uInt{"i-3e"};
-    bittorrent::BencodeDecoder decoder{bencode_uInt};
+    bittorrent::BencodeDecoder decoder{};
+    decoder.setBencode(bencode_uInt);
     auto val = decoder.dispatch();
 
     // Check i-3e
@@ -47,7 +50,8 @@ TEST(BecondeDecoderInt, DecodeInvalidInt)
 {
     /// Leading 0's are invalid 
     constexpr std::string_view bencode_Int{"i-03e"};
-    bittorrent::BencodeDecoder decoder{bencode_Int};
+    bittorrent::BencodeDecoder decoder{};
+    decoder.setBencode(bencode_Int);
     EXPECT_THROW(decoder.dispatch(), std::runtime_error);
 
     constexpr std::string_view bencode_uInt{"i03e"};

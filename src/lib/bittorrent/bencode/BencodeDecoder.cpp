@@ -10,11 +10,6 @@ BencodeDecoder::BencodeDecoder()
     , pos_{}
 {}
 
-BencodeDecoder::BencodeDecoder(const std::string_view &torrent)
-    : buffer_(torrent.begin(), torrent.end())
-    , pos_{}
-{}
-
 void BencodeDecoder::readTorrent(const std::string &filename)
 {
     // Safely use binary mode
@@ -105,10 +100,10 @@ BencodeValue BencodeDecoder::handleInt()
     int num{0};
 
     /// Check for signess 
-    bool sign{false};
+    bool negative{false};
     if (pos_ < buffer_.size() && buffer_[pos_] == '-')
     {
-        sign = true;
+        negative = true;
         ++pos_;
     }
 
@@ -141,7 +136,7 @@ BencodeValue BencodeDecoder::handleInt()
     // Advance position
     ++pos_;
 
-    return BencodeValue(sign ? -1 * num : num);
+    return BencodeValue(negative ? -1 * num : num);
 }
 
 BencodeValue BencodeDecoder::handleList()
