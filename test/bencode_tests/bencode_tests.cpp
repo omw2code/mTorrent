@@ -68,4 +68,10 @@ TEST(BencodeDecoderInt, DecodeLargeInt)
     auto val = decoder.dispatch();
 
     ASSERT_EQ(std::get<int64_t>(val.value), 1000000000000);
+
+    constexpr std::string_view bencode_neg{"i-1000000000000e"};
+    decoder.setBencode(bencode_neg);
+    val = decoder.dispatch();
+
+    ASSERT_EQ(std::get<int64_t>(val.value), -1000000000000);
 }
