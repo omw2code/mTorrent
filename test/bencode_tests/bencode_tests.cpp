@@ -75,3 +75,18 @@ TEST(BencodeDecoderInt, DecodeLargeInt)
 
     ASSERT_EQ(std::get<int64_t>(val.value), -1000000000000);
 }
+
+/// Lists are encoded as an 'l' followed by their elements (also bencoded) followed
+///  by an 'e'. For example l4:spam4:eggse corresponds to ['spam', 'eggs'].
+TEST(BencodeDecoderList, DecodeStringList)
+{
+    constexpr std::string_view bencode_list{"l4:spam4:eggse"};
+    bittorrent::BencodeDecoder decoder{};
+    decoder.setBencode(bencode_list);
+    auto val = decoder.dispatch();
+
+    /// Smoke test assert size is equal to 2
+    ASSERT_EQ(std::get<std::vector<bittorrent::BencodeValue>>(val.value).size(), 2);
+}
+
+

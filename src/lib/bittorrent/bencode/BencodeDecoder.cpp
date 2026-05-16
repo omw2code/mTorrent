@@ -69,7 +69,7 @@ BencodeValue BencodeDecoder::handleString()
         ++pos_;
     }
     
-    if (pos_ >- buffer_.size() || buffer_[pos_] != ':')
+    if (pos_ >= buffer_.size() || buffer_[pos_] != ':')
     {
         throw std::runtime_error("Malformed string type");
     }
@@ -87,7 +87,7 @@ BencodeValue BencodeDecoder::handleString()
 
     // Advance the index
     pos_ += str_len_;
-
+    
     // Elided
     return BencodeValue(std::move(str));
 }
@@ -146,7 +146,7 @@ BencodeValue BencodeDecoder::handleList()
     while (pos_ < buffer_.size() && buffer_[pos_] != 'e')
     {
         list.push_back(dispatch());
-        ++pos_;
+        //++pos_;
     }
     
     if (pos_ >= buffer_.size())
