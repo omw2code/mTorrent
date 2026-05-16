@@ -83,8 +83,7 @@ BencodeValue BencodeDecoder::handleString()
     }
 
     // Grab the string
-    std::string str;
-    str.assign(buffer_.begin() + pos_, buffer_.begin() + pos_ + str_len_);
+    std::string str(buffer_.begin() + pos_, buffer_.begin() + pos_ + str_len_);
 
     // Advance the index
     pos_ += str_len_;
