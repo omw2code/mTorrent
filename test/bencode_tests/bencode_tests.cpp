@@ -62,10 +62,10 @@ TEST(BecondeDecoderInt, DecodeInvalidInt)
 
 TEST(BencodeDecoderInt, DecodeLargeInt)
 {
-    constexpr std::string_view bencode_int{"i1000000000000"};
-    bittorent::BencodeDecoder decoder{};
+    constexpr std::string_view bencode_int{"i1000000000000e"};
+    bittorrent::BencodeDecoder decoder{};
     decoder.setBencode(bencode_int);
     auto val = decoder.dispatch();
 
-    ASSERT_EQ(std::get<int64_t>(val.value), bencode_int);
+    ASSERT_EQ(std::get<int64_t>(val.value), 1000000000000);
 }

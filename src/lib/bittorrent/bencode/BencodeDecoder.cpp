@@ -97,7 +97,7 @@ BencodeValue BencodeDecoder::handleInt()
 {
     // Move past 'i'
     ++pos_;
-    int num{0};
+    int64_t num{0};
 
     /// Check for signess 
     bool negative{false};
