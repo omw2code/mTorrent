@@ -1,4 +1,5 @@
 
+#include <ranges>
 #include <gtest/gtest.h>
 #include <bencode/BencodeDecoder.hpp>
 
@@ -86,7 +87,16 @@ TEST(BencodeDecoderList, DecodeStringList)
     auto val = decoder.dispatch();
 
     /// Smoke test assert size is equal to 2
-    ASSERT_EQ(std::get<std::vector<bittorrent::BencodeValue>>(val.value).size(), 2);
+    using bittorrent_vec = std::vector<bittorrent::BencodeValue>;
+    ASSERT_EQ(std::get<bittorrent_vec>(val.value).size(), 2);
+    std::vector<std::string> expected{"spam", "eggs"};
+    for (const auto& [ben_val, real_val]  : std::views::zip(std::get<bittorrent_vec>(val.value), expected))
+    {
+        using BenBaseType = std::decay_t<decltype(std::get<std::string>(ben_val.value))>;
+         static_assert(std::is_same<
+             BenBaseType , 
+             std::string>::value); 
+         
+         ASSERT_EQ(std::get<std::string>(ben_val.value), real_val);
+    }
 }
-
-

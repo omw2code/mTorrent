@@ -1,3 +1,4 @@
+#include <string>
 #include <openssl/sha.h>
 #include <protocol/dht/node/Node.hpp>
 
