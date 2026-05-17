@@ -77,6 +77,7 @@ void TorrentManager::grabMetaInfo(std::unordered_map<std::string, bittorrent::Be
                 meta_info_.files.emplace_back({
                     .length: std::get<uint64_t>(length_it->second.value),
                     .path:   std::get<std::string>(path_it->second.value)});
+        });
     }
     else
     {
