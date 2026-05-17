@@ -3,7 +3,8 @@ add_library(bencode)
 
 target_sources(bencode
   PRIVATE
-  BencodeDecoder.cpp)
+  BencodeDecoder.cpp
+  TorrentMetaInfo.cpp)
 
 target_include_directories(bencode
   PUBLIC
