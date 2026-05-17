@@ -15,6 +15,10 @@ public:
     TorrentMetaInfo()
         : announce{}
         , name {}
+        , piece_length{}
+        , pieces{}
+        , length{}
+        , files{}
     {};
 
     using SHA1hash = std::array<uint8_t, 20>;

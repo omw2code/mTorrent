@@ -92,7 +92,7 @@ private:
     int str_len_;
     
     /// A dictionary of decoded bencode data
-    std::map<std::string, BencodeValue> decode_dict_;
+    std::map<std::string, BencodeValue> info_dict_;
 };
 
 }; /// namespace bittorrent
