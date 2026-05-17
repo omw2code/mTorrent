@@ -174,7 +174,7 @@ BencodeValue BencodeDecoder::handleDict()
     {
         auto key = std::get<std::string>(dispatch().value);
         auto val = dispatch();
-        decode_dict_[key] = val;
+        dict[key] = val;
     }
     return BencodeValue(std::move(dict));
 }
