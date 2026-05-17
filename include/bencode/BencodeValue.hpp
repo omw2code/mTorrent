@@ -26,6 +26,7 @@ public:
     BencodeValue() = default;
     BencodeValue(int64_t num) : value(num) {};
     BencodeValue(std::string str) : value(std::move(str)) {};
+    BencodeValue(const char *str) : value(std::string(str)) {};
     BencodeValue(BencodeList list) : value(std::move(list)) {};
     BencodeValue(BencodeDict dict) : value(std::move(dict)) {};
 };

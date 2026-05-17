@@ -100,3 +100,32 @@ TEST(BencodeDecoderList, DecodeStringList)
          ASSERT_EQ(std::get<std::string>(ben_val.value), real_val);
     }
 }
+
+
+TEST(BencodeDecoderList, DecodeMultiTypeList)
+{
+    constexpr std::string_view bencode_list{"l4:spami4e4:eggse"};
+    bittorrent::BencodeDecoder decoder{};
+    decoder.setBencode(bencode_list);
+    auto val = decoder.dispatch();
+
+    using BittorrentVec = std::vector<bittorrent::BencodeValue>;
+    auto decoded_vec = std::get<BittorrentVec>(val.value);
+    ASSERT_EQ(decoded_vec.size(), 3);
+    BittorrentVec expected{"spam", 4, "eggs"};
+
+    /// Just grab each value directly and don't worry about iterating through the
+    /// vectors cause that would be very ugly
+    using BenBaseTypeString = std::decay_t<decltype(std::get<std::string>(decoded_vec[0].value))>;
+    static_assert(std::is_same<BenBaseTypeString, std::string>::value);
+    ASSERT_EQ(std::get<std::string>(decoded_vec[0].value), "spam");
+
+    using BenBaseTypeInt = std::decay_t<decltype(std::get<int64_t>(decoded_vec[1].value))>;
+    static_assert(std::is_same<BenBaseTypeInt, int64_t>::value); 
+    ASSERT_EQ(std::get<int64_t>(decoded_vec[1].value), 4);
+
+    using BenBaseTypeString = std::decay_t<decltype(std::get<std::string>(decoded_vec[2].value))>;
+    static_assert(std::is_same<BenBaseTypeString, std::string>::value);
+    ASSERT_EQ(std::get<std::string>(decoded_vec[2].value), "eggs");
+}
+
