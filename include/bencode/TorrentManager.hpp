@@ -3,7 +3,7 @@
 
 namespace bittorrent
 {
-
+ 
 class TorrentManager
 {
 public:
