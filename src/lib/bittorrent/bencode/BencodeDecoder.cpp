@@ -11,7 +11,7 @@ BencodeDecoder::BencodeDecoder()
     , info_dict_{}
 {}
 
-void BencodeDecoder::readTorrent(const std::string &filename)
+void BencodeDecoder::loadTorrent(const std::string &filename)
 {
     // Safely use binary mode
     std::filesystem::path file_path(filename);

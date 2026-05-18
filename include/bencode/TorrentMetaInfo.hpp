@@ -33,7 +33,7 @@ public:
     struct File
     {
         uint64_t length{};
-       std::string path{};
+        std::string path{};
     };
 
     /// URL of the tracker

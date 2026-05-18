@@ -1,12 +1,14 @@
+#include <iostream>
 #include <algorithm>
 #include <string>
 #include <bencode/TorrentManager.hpp>
+#include <bencode/BencodeValue.hpp>
 
 namespace bittorrent
 {
 
 TorrentManager::TorrentManager()
-    : torrent_{std::string::npos}
+    : torrent_{}
     , decoder_{}
     , meta_info_{}
 {}
@@ -14,28 +16,32 @@ TorrentManager::TorrentManager()
 void TorrentManager::loadTorrent(const std::string &torrent)
 {
     torrent_ = torrent;
-    decoder_.readTorrent(torrent_);
+    decoder_.loadTorrent(torrent_);
 }
 
 void TorrentManager::readTorrent()
 {
-    if (torrent_ == std::string::npos)
+    if (torrent_ == "")
     {
         throw std::runtime_error("Error: Torrent must be loaded before reading");
     }
-    auto data = decoder_.dispatch();
+    auto data = std::get<std::unordered_map<std::string, BencodeValue>>(decoder_.dispatch().value);
 
     try 
     {
         grabMetaInfo(data);
     }
-    catch(std::runtime_error err)
+    catch(const std::runtime_error &err)
     {
-        errorDebug(err);  
+        errorDebug(err.what());  
+    }
+    catch(const std::bad_variant_access &err)
+    {
+        errorDebug(err.what());
     }
 }
 
-void TorrentManager::grabMetaInfo(std::unordered_map<std::string, bittorrent::BencodeValue> &data)
+void TorrentManager::grabMetaInfo(const std::unordered_map<std::string, BencodeValue> &data)
 {
     /// Fill out the meta info
     auto it = data.find("announce");
@@ -60,10 +66,10 @@ void TorrentManager::grabMetaInfo(std::unordered_map<std::string, bittorrent::Be
         {
             throw std::runtime_error("Failed to find length or files key in torrent");
         }
-        auto files = std::get<std::vector<BencodeValue>(it->second.value);
+        auto files = std::get<std::vector<BencodeValue>>(it->second.value);
         std::for_each(files.begin(), files.end(),
             [this](const BencodeValue &file){
-                auto file_info = std::get<std::unordered_map<std::string, BencodeValue>(file.value);
+                auto file_info = std::get<std::unordered_map<std::string, BencodeValue>>(file.value);
                 auto length_it = file_info.find("length");
                 if (length_it == file_info.end())
                 {
@@ -74,14 +80,25 @@ void TorrentManager::grabMetaInfo(std::unordered_map<std::string, bittorrent::Be
                 {
                     throw std::runtime_error("File info path key not found in torrent meta info");
                 }
-                meta_info_.files.emplace_back({
-                    .length: std::get<uint64_t>(length_it->second.value),
-                    .path:   std::get<std::string>(path_it->second.value)});
+                if (std::get<int64_t>(length_it->second.value) < 0)
+                {
+                    throw std::runtime_error("Invalid negative file length encountered");
+                }
+
+                /// We can safely cast length here
+                meta_info_.files.value().push_back({
+                    .length = static_cast<uint64_t>(std::get<int64_t>(length_it->second.value)),
+                    .path = std::get<std::string>(path_it->second.value)});
         });
     }
     else
     {
-        meta_info_.piece_length = std::get<uint64_t>(it->second.value);
+        if (std::get<int64_t>(it->second.value) < 0)
+        {
+            throw std::runtime_error("Invalid negative file length encountered");
+        }
+        // length should always be positive so we can safely cast this
+        meta_info_.length = static_cast<int64_t>(std::get<int64_t>(it->second.value));
     }
 
     it = data.find("piece_length");
@@ -89,6 +106,11 @@ void TorrentManager::grabMetaInfo(std::unordered_map<std::string, bittorrent::Be
     {
         throw std::runtime_error("Failed to find piece length key in torrent");
     }
+    if (std::get<int64_t>(it->second.value) < 0)
+    {
+        throw std::runtime_error("Invalid negative piece length encountered");
+    }
+    /// We can safely cast this here
     meta_info_.piece_length = std::get<int64_t>(it->second.value);
 
     it = data.find("pieces");
@@ -96,12 +118,13 @@ void TorrentManager::grabMetaInfo(std::unordered_map<std::string, bittorrent::Be
     {
         throw std::runtime_error("Failed to find pieces key in torrent");
     }
-    meta_find_.piece_length = deserialize(std::get<std::string>(it->second.value));
+    /// TODO: clean this part up a bit
+    meta_info_.pieces.push_back({deserialize(std::get<std::string>(it->second.value))});
 
-    it = data.find("
+    it = data.find("");
 }
 
-void TorrentManager::deserialize(std::string &hash) const
+uint8_t TorrentManager::deserialize(const std::string &hash)
 {
     /// Deserialize the SHA1 hash
 }
@@ -110,3 +133,5 @@ void TorrentManager::errorDebug(const std::string &err) const
 {
     std::cerr << "Malformed torrent: " << err << "\n";
 }
+
+} /// namespace bittorrent

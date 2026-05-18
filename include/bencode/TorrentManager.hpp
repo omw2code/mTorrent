@@ -1,6 +1,12 @@
 #ifndef __TORRENT_MANAGER_HPP__
 #define __TORRENT_MANAGER_HPP__
 
+#include <unordered_map>
+#include <string>
+#include "BencodeValue.hpp"
+#include "BencodeDecoder.hpp"
+#include "TorrentMetaInfo.hpp"
+
 namespace bittorrent
 {
  
@@ -9,10 +15,11 @@ class TorrentManager
 public:
     TorrentManager();
 
-    loadTorrent(std::string &torrent);
+    void loadTorrent(const std::string &torrent);
+    void readTorrent();
 private:
-    void grabMetainfo(std::unordered_map<std::string, BencodeValue> &data);
-    void deserialize(std::string &hash) const;
+    void grabMetaInfo(const std::unordered_map<std::string, BencodeValue> &data);
+    uint8_t deserialize(const std::string &hash);
     void errorDebug(const std::string &err) const; 
 private:
     std::string torrent_;
@@ -22,3 +29,5 @@ private:
 };
 
 } /// namespace bittorrent
+
+#endif

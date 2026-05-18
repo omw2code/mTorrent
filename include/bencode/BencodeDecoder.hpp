@@ -30,14 +30,14 @@ public:
 
     BencodeValue dispatch();
 
-private:
     /**
      * \brief Read torrent file to be decoded
      * 
      * \param filename The name of the torrent file
      */
-    void readTorrent(const std::string &filename);
+    void loadTorrent(const std::string &filename);
 
+private:
     /**
      * \brief Decode bencoded string types in UTF-8 format
      * 
