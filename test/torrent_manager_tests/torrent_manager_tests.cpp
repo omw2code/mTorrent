@@ -1,18 +1,18 @@
 #include <gtest/gtest.h>
-#include <Bencode/TorrentManager.hpp>
-#include <Bencode/TorrentMetaData.hpp>
+#include <bencode/TorrentManager.hpp>
+#include <bencode/TorrentMetaInfo.hpp>
 
 TEST(TorrentManagerTests, readOneFileTorrent)
 {
     bittorrent::TorrentManager manager;
     manager.loadTorrent("test.torrent");
     manager.readTorrent();
-    auto meta_data = manager.getMetaData(); 
+    auto meta_info = manager.getMetaInfo(); 
 
-   ASSERT(meta_data.announce, "http://tracker.example.com") 
-   ASSERT(meta_data.length, 12345); 
-   ASSERT(meta_data.name, "test.txt");
-   ASSERT(meta_data.piece_length, 13684); 
-   ASSERT(meta_data.pieces.size(), 1);
-   ASSERT(meta_data.pieces[1],"12345678901234567890"); 
+   ASSERT_EQ(meta_info.announce, "http://tracker.example.com"); 
+   ASSERT_EQ(meta_info.length, 12345); 
+   ASSERT_EQ(meta_info.name, "test.txt");
+   ASSERT_EQ(meta_info.piece_length, 13684); 
+   ASSERT_EQ(meta_info.pieces.size(), 1);
+   ASSERT_EQ(meta_info.pieces[1],"12345678901234567890"); 
 }
