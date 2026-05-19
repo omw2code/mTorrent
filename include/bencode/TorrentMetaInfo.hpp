@@ -21,7 +21,8 @@ public:
         , files{}
     {};
 
-    using SHA1hash = std::array<uint8_t, 20>;
+    //using SHA1hash = std::array<uint8_t, 20>;
+    using SHA1hash = std::string;
 
     /// For the purposes of the other keys, the multi-file case is 
     /// treated as only having a single file by concatenating the files 
