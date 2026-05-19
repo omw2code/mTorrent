@@ -18,8 +18,7 @@ void BencodeDecoder::loadTorrent(const std::string &filename)
     std::ifstream file(filename, std::ios::binary);
     if (!file.is_open())
     {
-        std::cerr << "Error opening file" << "\n";
-        exit(1);
+       throw std::runtime_error("Error opening torrent file");
     }
 
     // Replace and store the contents of the file into a buffer

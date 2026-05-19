@@ -5,7 +5,7 @@
 TEST(TorrentManagerTests, readOneFileTorrent)
 {
     bittorrent::TorrentManager manager;
-    manager.loadTorrent("test.torrent");
+    manager.loadTorrent("single_file.torrent");
     manager.readTorrent();
     auto meta_info = manager.getMetaInfo(); 
 
@@ -15,4 +15,10 @@ TEST(TorrentManagerTests, readOneFileTorrent)
    ASSERT_EQ(meta_info.piece_length, 13684); 
    ASSERT_EQ(meta_info.pieces.size(), 1);
    ASSERT_EQ(meta_info.pieces[1],"12345678901234567890"); 
+}
+
+TEST(TorrentManagerTests, readMultiFileTorrent)
+{
+    bittorrent::TorrentManager manager;
+    manager.loadTorrent("multi_file.torrent");
 }
