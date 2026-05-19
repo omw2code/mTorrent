@@ -13,6 +13,11 @@ TorrentManager::TorrentManager()
     , meta_info_{}
 {}
 
+const TorrentMetaInfo& TorrentManager::getMetaInfo()
+{
+   return meta_info_;
+}
+
 void TorrentManager::loadTorrent(const std::string &torrent)
 {
     torrent_ = torrent;
@@ -119,7 +124,8 @@ void TorrentManager::grabMetaInfo(const std::unordered_map<std::string, BencodeV
         throw std::runtime_error("Failed to find pieces key in torrent");
     }
     /// TODO: clean this part up a bit
-    meta_info_.pieces.push_back({deserialize(std::get<std::string>(it->second.value))});
+    //meta_info_.pieces.push_back({deserialize(std::get<std::string>(it->second.value))});
+    meta_info_.pieces.push_back({std::get<std::string>(it->second.value)});
 
     it = data.find("");
 }

@@ -14,7 +14,7 @@ class TorrentManager
 {
 public:
     TorrentManager();
-
+    const TorrentMetaInfo& getMetaInfo(); 
     void loadTorrent(const std::string &torrent);
     void readTorrent();
 private:
