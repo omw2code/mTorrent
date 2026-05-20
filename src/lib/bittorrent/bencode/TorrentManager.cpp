@@ -20,8 +20,15 @@ const TorrentMetaInfo& TorrentManager::getMetaInfo()
 
 void TorrentManager::loadTorrent(const std::string &torrent)
 {
-    torrent_ = torrent;
-    decoder_.loadTorrent(torrent_);
+    try
+    {
+        torrent_ = torrent;
+        decoder_.loadTorrent(torrent_);
+    }
+    catch(const std::runtime_error &err)
+    {
+        errorDebug(err.what());
+    }
 }
 
 void TorrentManager::readTorrent()
