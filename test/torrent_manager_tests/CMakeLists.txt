@@ -10,5 +10,12 @@ target_link_libraries( torrent_manager_tests
     GTest::gtest_main
   )
 
+target_compile_definitions( torrent_manager_tests
+  PRIVATE
+    TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/test/torrent_manager_tests"
+  )
+
 include(GoogleTest)
-gtest_discover_tests(torrent_manager_tests)
+
+gtest_discover_tests(torrent_manager_tests) 
+
