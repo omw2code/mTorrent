@@ -33,6 +33,7 @@ BencodeValue BencodeDecoder::dispatch()
 
     // Iterate through the buffer
     char c = buffer_[pos_];
+    std::cout << "DEBUG: " << c << "\n";
     switch (c)
     {
     case 'i':
@@ -47,11 +48,12 @@ BencodeValue BencodeDecoder::dispatch()
     default:
         if (std::isdigit(static_cast<unsigned char>(c)))
         {
+            std::cout <<"DEBUG: its a string for sure" << "\n";
             return handleString();
         }
         else
         {
-           throw std::runtime_error("Invalid or unexpected byte");
+           throw std::runtime_error("Invalid or unexpected byte: ");
         }
     }
 }
@@ -59,13 +61,14 @@ BencodeValue BencodeDecoder::dispatch()
 BencodeValue BencodeDecoder::handleString()
 {
     // Reset the length
-    str_len_ = 0;
+    int str_len{};
 
     // Store the string length
     while(pos_ < buffer_.size() &&
           std::isdigit(static_cast<unsigned char>(buffer_[pos_])))
     {
-        str_len_ = (str_len_ * 10) + (buffer_[pos_] - '0');
+        str_len = (str_len * 10) + (buffer_[pos_] - '0');
+        std::cout << "DEBUG: str len = {" << str_len << "}\n";
         ++pos_;
     }
     
@@ -77,17 +80,18 @@ BencodeValue BencodeDecoder::handleString()
     // Skip ':'
     ++pos_;
     
-    if (pos_ + str_len_ > buffer_.size())
+    if (pos_ + str_len > buffer_.size())
     {
         throw std::runtime_error("String length exceeds buffer size");
     }
 
     // Grab the string
-    std::string str(buffer_.begin() + pos_, buffer_.begin() + pos_ + str_len_);
-
+    std::string str(buffer_.begin() + pos_, buffer_.begin() + pos_ + str_len);
     // Advance the index
-    pos_ += str_len_;
+    pos_ += str_len;
     
+    std::cout << "DEBUG: str is: " << str << " and buffer pos is " << (unsigned char)buffer_[pos_] << "\n";
+
     // Elided
     return BencodeValue(std::move(str));
 }
@@ -134,7 +138,7 @@ BencodeValue BencodeDecoder::handleInt()
     
     // Advance position
     ++pos_;
-
+    std::cout << "DEBUG: num is: " << num << "\n";
     return BencodeValue(negative ? -1 * num : num);
 }
 

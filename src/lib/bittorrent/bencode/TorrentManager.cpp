@@ -62,6 +62,11 @@ void TorrentManager::grabMetaInfo(const std::unordered_map<std::string, BencodeV
         throw std::runtime_error("Failed to find announce key in torrent");
     }
     meta_info_.announce = std::get<std::string>(it->second.value);
+    it = data.find("info");
+    if (it == data.end())
+    {
+        throw std::runtime_error("Failed to find info key in torrent");
+    }
 
     it = data.find("name");
     if (it == data.end())
@@ -73,6 +78,7 @@ void TorrentManager::grabMetaInfo(const std::unordered_map<std::string, BencodeV
     it = data.find("length");
     if (it == data.end())
     {
+        std::cout << "DEBUG: length is END ITER\n";
         it = data.find("files");
         if (it == data.end())
         {
@@ -109,6 +115,7 @@ void TorrentManager::grabMetaInfo(const std::unordered_map<std::string, BencodeV
         {
             throw std::runtime_error("Invalid negative file length encountered");
         }
+        std::cout << "DEBUG: length is not the end iter\n";
         // length should always be positive so we can safely cast this
         meta_info_.length = static_cast<int64_t>(std::get<int64_t>(it->second.value));
     }

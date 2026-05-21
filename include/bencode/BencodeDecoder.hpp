@@ -87,9 +87,6 @@ private:
 
     /// Position in the buffer
     int pos_;
-
-    /// The length of the decoded string type
-    int str_len_;
     
     /// A dictionary of decoded bencode data
     std::map<std::string, BencodeValue> info_dict_;
