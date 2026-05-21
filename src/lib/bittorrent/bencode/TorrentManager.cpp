@@ -68,19 +68,20 @@ void TorrentManager::grabMetaInfo(const std::unordered_map<std::string, BencodeV
         throw std::runtime_error("Failed to find info key in torrent");
     }
 
-    it = data.find("name");
-    if (it == data.end())
+    auto info_dict = std::get<std::unordered_map<std::string, BencodeValue>>(it->second.value);
+    it = info_dict.find("name");
+    if (it == info_dict.end())
     {
         throw std::runtime_error("Failed to find name key in torrent");
     }
     meta_info_.name = std::get<std::string>(it->second.value);
 
-    it = data.find("length");
-    if (it == data.end())
+    it = info_dict.find("length");
+    if (it == info_dict.end())
     {
         std::cout << "DEBUG: length is END ITER\n";
-        it = data.find("files");
-        if (it == data.end())
+        it = info_dict.find("files");
+        if (it == info_dict.end())
         {
             throw std::runtime_error("Failed to find length or files key in torrent");
         }
@@ -115,13 +116,12 @@ void TorrentManager::grabMetaInfo(const std::unordered_map<std::string, BencodeV
         {
             throw std::runtime_error("Invalid negative file length encountered");
         }
-        std::cout << "DEBUG: length is not the end iter\n";
         // length should always be positive so we can safely cast this
-        meta_info_.length = static_cast<int64_t>(std::get<int64_t>(it->second.value));
+        meta_info_.length = std::make_optional(static_cast<int64_t>(std::get<int64_t>(it->second.value)));
     }
 
-    it = data.find("piece_length");
-    if (it == data.end())
+    it = info_dict.find("piece length");
+    if (it == info_dict.end())
     {
         throw std::runtime_error("Failed to find piece length key in torrent");
     }
@@ -132,16 +132,17 @@ void TorrentManager::grabMetaInfo(const std::unordered_map<std::string, BencodeV
     /// We can safely cast this here
     meta_info_.piece_length = std::get<int64_t>(it->second.value);
 
-    it = data.find("pieces");
-    if (it == data.end())
+    it = info_dict.find("pieces");
+    if (it == info_dict.end())
     {
         throw std::runtime_error("Failed to find pieces key in torrent");
     }
     /// TODO: clean this part up a bit
     //meta_info_.pieces.push_back({deserialize(std::get<std::string>(it->second.value))});
-    meta_info_.pieces.push_back({std::get<std::string>(it->second.value)});
-
-    it = data.find("");
+    auto str = std::get<std::string>(it->second.value);
+    std::cout << "DEBUG: my str is = " << str << " and the size is = " << str.size() << "\n";
+    //meta_info_.pieces.push_back(std::get<std::string>(it->second.value));
+    meta_info_.pieces.push_back(str);
 }
 
 uint8_t TorrentManager::deserialize(const std::string &hash)
