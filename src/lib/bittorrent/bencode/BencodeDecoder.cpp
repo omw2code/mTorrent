@@ -33,7 +33,6 @@ BencodeValue BencodeDecoder::dispatch()
 
     // Iterate through the buffer
     char c = buffer_[pos_];
-    std::cout << "DEBUG: " << c << "\n";
     switch (c)
     {
     case 'i':
@@ -48,7 +47,6 @@ BencodeValue BencodeDecoder::dispatch()
     default:
         if (std::isdigit(static_cast<unsigned char>(c)))
         {
-            std::cout <<"DEBUG: its a string for sure" << "\n";
             return handleString();
         }
         else
@@ -68,7 +66,6 @@ BencodeValue BencodeDecoder::handleString()
           std::isdigit(static_cast<unsigned char>(buffer_[pos_])))
     {
         str_len = (str_len * 10) + (buffer_[pos_] - '0');
-        std::cout << "DEBUG: str len = {" << str_len << "}\n";
         ++pos_;
     }
     
@@ -89,8 +86,10 @@ BencodeValue BencodeDecoder::handleString()
     std::string str(buffer_.begin() + pos_, buffer_.begin() + pos_ + str_len);
     // Advance the index
     pos_ += str_len;
+
+    printf("%.*s", (int)str.size()+ 1, str.c_str());
+
     
-    std::cout << "DEBUG: str is: " << str << " and buffer pos is " << (unsigned char)buffer_[pos_] << "\n";
 
     // Elided
     return BencodeValue(std::move(str));
@@ -138,7 +137,7 @@ BencodeValue BencodeDecoder::handleInt()
     
     // Advance position
     ++pos_;
-    std::cout << "DEBUG: num is: " << num << "\n";
+    
     return BencodeValue(negative ? -1 * num : num);
 }
 
