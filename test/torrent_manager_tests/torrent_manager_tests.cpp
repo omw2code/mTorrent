@@ -15,7 +15,7 @@ TEST(TorrentManagerTests, readOneFileTorrent)
    ASSERT_EQ(meta_info.announce, "http://tracker.example.com"); 
    ASSERT_EQ(meta_info.length, 12345); 
    ASSERT_EQ(meta_info.name, "test.txt");
-   ASSERT_EQ(meta_info.piece_length, 13684); 
+   ASSERT_EQ(meta_info.piece_length, 16384); 
    ASSERT_EQ(meta_info.pieces.size(), 1);
    ASSERT_EQ(meta_info.pieces[1],"12345678901234567890"); 
 }
