@@ -138,11 +138,7 @@ void TorrentManager::grabMetaInfo(const std::unordered_map<std::string, BencodeV
         throw std::runtime_error("Failed to find pieces key in torrent");
     }
     /// TODO: clean this part up a bit
-    //meta_info_.pieces.push_back({deserialize(std::get<std::string>(it->second.value))});
-    auto str = std::get<std::string>(it->second.value);
-    std::cout << "DEBUG: my str is = " << str << " and the size is = " << str.size() << "\n";
-    //meta_info_.pieces.push_back(std::get<std::string>(it->second.value));
-    meta_info_.pieces.push_back(str);
+    meta_info_.pieces.push_back(std::get<std::string>(it->second.value));
 }
 
 uint8_t TorrentManager::deserialize(const std::string &hash)

@@ -17,7 +17,7 @@ TEST(TorrentManagerTests, readOneFileTorrent)
    ASSERT_EQ(meta_info.name, "test.txt");
    ASSERT_EQ(meta_info.piece_length, 16384); 
    ASSERT_EQ(meta_info.pieces.size(), 1);
-   ASSERT_EQ(meta_info.pieces[1],"12345678901234567890"); 
+   ASSERT_EQ(meta_info.pieces[0],"12345678901234567890"); 
 }
 
 TEST(TorrentManagerTests, readMultiFileTorrent)
