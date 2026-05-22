@@ -87,8 +87,11 @@ BencodeValue BencodeDecoder::handleString()
     // Advance the index
     pos_ += str_len;
 
-    printf("%.*s", (int)str.size()+ 1, str.c_str());
+    //printf("%.*s", (int)str.size()+ 1, str.c_str());
+std::cout << "size = " << str.size() << "\n";
 
+for (unsigned char c : str)
+    std::cout << (int)c << " ";
     
 
     // Elided
