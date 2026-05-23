@@ -33,7 +33,6 @@ BencodeValue BencodeDecoder::dispatch()
 
     // Iterate through the buffer
     char c = buffer_[pos_];
-    std::cout << "BYTE IS = " << c << "\n";
     switch (c)
     {
     case 'i':
@@ -146,7 +145,6 @@ BencodeValue BencodeDecoder::handleList()
     while (pos_ < buffer_.size() && buffer_[pos_] != 'e')
     {
         list.push_back(dispatch());
-        //++pos_;
     }
     
     if (pos_ >= buffer_.size())
@@ -172,12 +170,12 @@ BencodeValue BencodeDecoder::handleDict()
     BencodeValue::BencodeDict dict;
     while(pos_ < buffer_.size() && buffer_[pos_] != 'e')
     {
-        std::cout << "DEBUG: before std::get\n";
-        auto key = std::get<std::string>(dispatch().value);
-        std::cout << "DEBUG: after std::get\n";
+        char c = buffer_[pos_];
+        auto key = std::get<std::string>(dispatch().value); 
         auto val = dispatch();
         dict[key] = val;
     }
+    ++pos_;
     return BencodeValue(std::move(dict));
 }
 
