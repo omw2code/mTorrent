@@ -26,4 +26,6 @@ TEST(TorrentManagerTests, readMultiFileTorrent)
     manager.loadTorrent("multi_file.torrent");
     manager.readTorrent();
     auto meta_info = manager.getMetaInfo();
+
+    ASSERT_EQ(meta_info.announce, "http://tracker.example.com");
 }
