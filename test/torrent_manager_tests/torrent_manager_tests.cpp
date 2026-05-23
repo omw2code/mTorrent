@@ -24,4 +24,6 @@ TEST(TorrentManagerTests, readMultiFileTorrent)
 {
     bittorrent::TorrentManager manager{};
     manager.loadTorrent("multi_file.torrent");
+    manager.readTorrent();
+    auto meta_info = manager.getMetaInfo();
 }
