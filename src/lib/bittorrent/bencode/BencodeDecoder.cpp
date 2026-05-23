@@ -33,6 +33,7 @@ BencodeValue BencodeDecoder::dispatch()
 
     // Iterate through the buffer
     char c = buffer_[pos_];
+    std::cout << "BYTE IS = " << c << "\n";
     switch (c)
     {
     case 'i':
@@ -171,7 +172,9 @@ BencodeValue BencodeDecoder::handleDict()
     BencodeValue::BencodeDict dict;
     while(pos_ < buffer_.size() && buffer_[pos_] != 'e')
     {
+        std::cout << "DEBUG: before std::get\n";
         auto key = std::get<std::string>(dispatch().value);
+        std::cout << "DEBUG: after std::get\n";
         auto val = dispatch();
         dict[key] = val;
     }

@@ -37,11 +37,14 @@ void TorrentManager::readTorrent()
     {
         throw std::runtime_error("Error: Torrent must be loaded before reading");
     }
-    auto data = std::get<std::unordered_map<std::string, BencodeValue>>(decoder_.dispatch().value);
 
     try 
     {
-        grabMetaInfo(data);
+        auto val = decoder_.dispatch();
+        //std::cout << "DEBUG GET " << std::get
+        //auto data = std::get<std::unordered_map<std::string, BencodeValue>>(decoder_.dispatch().value);
+        std::cout << "DEBUG: Finished reading the torrent, grabbing the meta info data\n";
+        //grabMetaInfo(data);
     }
     catch(const std::runtime_error &err)
     {
@@ -77,15 +80,16 @@ void TorrentManager::grabMetaInfo(const std::unordered_map<std::string, BencodeV
     meta_info_.name = std::get<std::string>(it->second.value);
 
     it = info_dict.find("length");
+    std::cout << "DEBUG: about to see if we found length\n";
     if (it == info_dict.end())
     {
-        std::cout << "DEBUG: length is END ITER\n";
         it = info_dict.find("files");
         if (it == info_dict.end())
         {
             throw std::runtime_error("Failed to find length or files key in torrent");
         }
         auto files = std::get<std::vector<BencodeValue>>(it->second.value);
+        
         std::for_each(files.begin(), files.end(),
             [this](const BencodeValue &file){
                 auto file_info = std::get<std::unordered_map<std::string, BencodeValue>>(file.value);

@@ -22,8 +22,10 @@ TEST(TorrentManagerTests, readOneFileTorrent)
 
 TEST(TorrentManagerTests, readMultiFileTorrent)
 {
+    namespace fs = std::filesystem;
     bittorrent::TorrentManager manager{};
-    manager.loadTorrent("multi_file.torrent");
+    fs::path test_file = fs::path(TEST_DATA_DIR) / "multi_file.torrent";
+    manager.loadTorrent(test_file.string());
     manager.readTorrent();
     auto meta_info = manager.getMetaInfo();
 
