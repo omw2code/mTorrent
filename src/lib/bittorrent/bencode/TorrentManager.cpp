@@ -40,19 +40,18 @@ void TorrentManager::readTorrent()
 
     try 
     {
-        auto val = decoder_.dispatch();
-        //std::cout << "DEBUG GET " << std::get
-        //auto data = std::get<std::unordered_map<std::string, BencodeValue>>(decoder_.dispatch().value);
-        std::cout << "DEBUG: Finished reading the torrent, grabbing the meta info data\n";
-        //grabMetaInfo(data);
+        auto data = std::get<std::unordered_map<std::string, BencodeValue>>(decoder_.dispatch().value);
+        grabMetaInfo(data);
     }
     catch(const std::runtime_error &err)
     {
         errorDebug(err.what());  
+        return;
     }
     catch(const std::bad_variant_access &err)
     {
         errorDebug(err.what());
+        return;
     }
 }
 
@@ -80,7 +79,6 @@ void TorrentManager::grabMetaInfo(const std::unordered_map<std::string, BencodeV
     meta_info_.name = std::get<std::string>(it->second.value);
 
     it = info_dict.find("length");
-    std::cout << "DEBUG: about to see if we found length\n";
     if (it == info_dict.end())
     {
         it = info_dict.find("files");
