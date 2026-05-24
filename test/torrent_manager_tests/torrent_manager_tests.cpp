@@ -38,4 +38,8 @@ TEST(TorrentManagerTests, readMultiFileTorrent)
     ASSERT_EQ(meta_info.files->at(1).length, 2000);
     ASSERT_EQ(meta_info.files->at(1).path, "sub/file2.txt");
     ASSERT_EQ(meta_info.name, "MyData");
+    ASSERT_EQ(meta_info.piece_length, 16384);
+    ASSERT_EQ(meta_info.pieces.size(), 2);
+    ASSERT_EQ(meta_info.pieces[0], "12345678901234567890");
+    ASSERT_EQ(meta_info.pieces[1], "abcdefghijabcdefghij");
 }
