@@ -161,8 +161,19 @@ void TorrentManager::grabMetaInfo(const std::unordered_map<std::string, BencodeV
     {
         throw std::runtime_error("Failed to find pieces key in torrent");
     }
-    /// TODO: clean this part up a bit
-    meta_info_.pieces.push_back(std::get<std::string>(it->second.value));
+    
+    auto pieces = std::get<std::string>(it->second.value);
+    if (pieces.length() % 20)
+    {
+        throw std::runtime_error("Pieces is not a multiple of 20");
+    }
+
+    /// Grab all the pieces
+    for (int i{}; i < pieces.length(); i+=20)
+    {
+        /// TODO: decode the pieces
+        meta_info_.pieces.push_back({pieces.data() + i, 20});
+    }
 }
 
 uint8_t TorrentManager::deserialize(const std::string &hash)
