@@ -32,4 +32,5 @@ TEST(TorrentManagerTests, readMultiFileTorrent)
 
     ASSERT_EQ(meta_info.announce, "http://tracker.example.com");
     ASSERT_EQ(meta_info.length, std::nullopt);
+    ASSERT_EQ(meta_info.files->size(), 2);
 }
