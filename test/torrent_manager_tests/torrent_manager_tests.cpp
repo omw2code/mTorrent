@@ -33,4 +33,9 @@ TEST(TorrentManagerTests, readMultiFileTorrent)
     ASSERT_EQ(meta_info.announce, "http://tracker.example.com");
     ASSERT_EQ(meta_info.length, std::nullopt);
     ASSERT_EQ(meta_info.files->size(), 2);
+    ASSERT_EQ(meta_info.files->at(0).length, 1000); 
+    ASSERT_EQ(meta_info.files->at(0).path, "file1.txt");
+    ASSERT_EQ(meta_info.files->at(1).length, 2000);
+    ASSERT_EQ(meta_info.files->at(1).path, "sub/file2.txt");
+    ASSERT_EQ(meta_info.name, "MyData");
 }
