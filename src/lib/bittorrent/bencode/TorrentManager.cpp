@@ -1,3 +1,4 @@
+#include <filesystem>
 #include <iostream>
 #include <algorithm>
 #include <string>
@@ -49,6 +50,11 @@ void TorrentManager::readTorrent()
         return;
     }
     catch(const std::bad_variant_access &err)
+    {
+        errorDebug(err.what());
+        return;
+    }
+    catch(const std::bad_optional_access &err)
     {
         errorDebug(err.what());
         return;
@@ -105,11 +111,27 @@ void TorrentManager::grabMetaInfo(const std::unordered_map<std::string, BencodeV
                 {
                     throw std::runtime_error("Invalid negative file length encountered");
                 }
+                
+                std::filesystem::path path;
+                auto path_vec = std::get<std::vector<BencodeValue>>(path_it->second.value);
+                for (const auto & file : path_vec)
+                {
+                    path /= std::get<std::string>(file.value);
+                }
+
+                if (!meta_info_.files)
+                {
+                    /// Init the optional
+                    meta_info_.files.emplace();
+                }
 
                 /// We can safely cast length here
-                meta_info_.files.value().push_back({
-                    .length = static_cast<uint64_t>(std::get<int64_t>(length_it->second.value)),
-                    .path = std::get<std::string>(path_it->second.value)});
+                meta_info_.files->push_back({
+                    .length = static_cast<uint64_t>(
+                        std::get<int64_t>(length_it->second.value)
+                    ),
+                    .path = path.string()
+                });
         });
     }
     else
@@ -119,7 +141,7 @@ void TorrentManager::grabMetaInfo(const std::unordered_map<std::string, BencodeV
             throw std::runtime_error("Invalid negative file length encountered");
         }
         // length should always be positive so we can safely cast this
-        meta_info_.length = std::make_optional(static_cast<int64_t>(std::get<int64_t>(it->second.value)));
+        meta_info_.length = static_cast<int64_t>(std::get<int64_t>(it->second.value));
     }
 
     it = info_dict.find("piece length");
