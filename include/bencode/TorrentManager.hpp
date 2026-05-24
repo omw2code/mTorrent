@@ -26,6 +26,7 @@ private:
 
     BencodeDecoder decoder_;
     TorrentMetaInfo meta_info_;
+    static constexpr int hash_size_{20};
 };
 
 } /// namespace bittorrent

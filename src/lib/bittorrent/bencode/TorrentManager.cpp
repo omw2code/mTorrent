@@ -169,10 +169,10 @@ void TorrentManager::grabMetaInfo(const std::unordered_map<std::string, BencodeV
     }
 
     /// Grab all the pieces
-    for (int i{}; i < pieces.length(); i+=20)
+    for (int i{}; i < pieces.length(); i+=hash_size_)
     {
         /// TODO: decode the pieces
-        meta_info_.pieces.push_back({pieces.data() + i, 20});
+        meta_info_.pieces.push_back({pieces.data() + i, hash_size_});
     }
 }
 

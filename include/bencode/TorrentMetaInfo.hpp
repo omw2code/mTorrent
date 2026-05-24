@@ -19,10 +19,11 @@ public:
         , pieces{}
         , length{}
         , files{}
+        , raw_info_bytes{}
     {};
 
-    //using SHA1hash = std::array<uint8_t, 20>;
-    using SHA1hash = std::string;
+    using SHA1hash = std::array<std::byte, 20>;
+    using ByteBuffer = std::vector<std::byte>;
 
     /// For the purposes of the other keys, the multi-file case is 
     /// treated as only having a single file by concatenating the files 
@@ -62,6 +63,9 @@ public:
     /// otherwise it represents a set of files which go in a directory structure.
     std::optional<uint64_t> length;
     std::optional<std::vector<File>> files;
+    
+    /// The exact dictionary info hash used to communicate with the swarm
+    ByteBuffer raw_info_bytes;
 };
 
 } /// namespace bittorrent
