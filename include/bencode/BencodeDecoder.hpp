@@ -24,10 +24,10 @@ public:
         BencodeDict>;
 
     template<typename T>
-    using Callback = std::function<void(T&)>;
+    using Callback = std::function<void(T)>;
     struct Callbacks
     {
-        Callback<BencodeValue> on_decode_callback;
+        Callback<const BencodeValue&> on_decode_callback;
     };
 
     BencodeDecoder();

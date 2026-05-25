@@ -1,3 +1,4 @@
+#include <fstream>
 #include <filesystem>
 #include <iostream>
 #include <algorithm>
@@ -12,16 +13,23 @@ TorrentManager::TorrentManager()
     : torrent_{}
     , decoder_{}
     , meta_info_{}
-{}
+{
+    BencodeDecoder::Callbacks callbacks;
+    callbacks.on_decode_callback = [this](const BencodeValue &meta){
+        readTorrent();
+    };
+}
+
 
 const TorrentMetaInfo& TorrentManager::getMetaInfo()
 {
    return meta_info_;
 }
 
-void BencodeDecoder::loadTorrent(const std::string &filename)
+void TorrentManager::loadTorrent(const std::string &filename)
 {
     // Safely use binary mode
+    torrent_ = filename;
     std::filesystem::path file_path(filename);
     std::ifstream file(filename, std::ios::binary);
     if (!file.is_open())
@@ -30,22 +38,10 @@ void BencodeDecoder::loadTorrent(const std::string &filename)
     }
 
     // Replace and store the contents of the file into a buffer
-    buffer_.assign(std::istreambuf_iterator<char>(file),
+    buffer_->assign(std::istreambuf_iterator<char>(file),
                    std::istreambuf_iterator<char>());
 }
 
-void TorrentManager::loadTorrent(const std::string &torrent)
-{
-    try
-    {
-        torrent_ = torrent;
-        decoder_.loadTorrent(torrent_);
-    }
-    catch(const std::runtime_error &err)
-    {
-        errorDebug(err.what());
-    }
-}
 
 void TorrentManager::readTorrent()
 {
@@ -53,11 +49,17 @@ void TorrentManager::readTorrent()
     {
         throw std::runtime_error("Error: Torrent must be loaded before reading");
     }
+    
+    /// Decode the torrent
+    decoder_.decode();
+}
 
+void TorrentManager::extractMetaInfo(const BencodeValue &data)
+{
     try 
     {
-        auto data = std::get<std::unordered_map<std::string, BencodeValue>>(decoder_.dispatch().value);
-        grabMetaInfo(data);
+        auto converted_data = std::get<std::unordered_map<std::string, BencodeValue>>(data.value);
+        grabMetaInfo(converted_data);
     }
     catch(const std::runtime_error &err)
     {

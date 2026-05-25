@@ -18,6 +18,7 @@ public:
     void loadTorrent(const std::string &torrent);
     void readTorrent();
 private:
+    void extractMetaInfo(const BencodeValue &data);
     void grabMetaInfo(const std::unordered_map<std::string, BencodeValue> &data);
     uint8_t deserialize(const std::string &hash);
     void errorDebug(const std::string &err) const; 
@@ -27,6 +28,7 @@ private:
     BencodeDecoder decoder_;
     TorrentMetaInfo meta_info_;
     static constexpr int hash_size_{20};
+    std::shared_ptr<std::vector<uint8_t>> buffer_;
 };
 
 } /// namespace bittorrent
