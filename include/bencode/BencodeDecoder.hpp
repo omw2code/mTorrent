@@ -1,6 +1,7 @@
 #ifndef BENCODE_DECODER_HPP
 #define BENCODE_DECODER_HPP
 
+#include <memory>
 #include <string>
 #include <vector>
 #include <map>
@@ -22,13 +23,24 @@ public:
         BencodeList,
         BencodeDict>;
 
+    template<typename T>
+    using Callback = std::function<void(T&)>;
+    struct Callbacks
+    {
+        Callback<BencodeValue> on_decode_callback;
+    };
+
     BencodeDecoder();
     
     void setTorrent(const std::string &filename);
 
     void setBencode(const std::string_view &beconde);
 
-    BencodeValue dispatch();
+    void decode();
+
+    void setCallbacks(Callbacks &&callbacks);
+
+    void setBuffer(const std::shared_ptr<std::vector<uint8_t>> &buffer);
 
     /**
      * \brief Read torrent file to be decoded
@@ -38,6 +50,7 @@ public:
     void loadTorrent(const std::string &filename);
 
 private:
+    BencodeValue dispatch();
     /**
      * \brief Decode bencoded string types in UTF-8 format
      * 
@@ -73,8 +86,6 @@ private:
      */
     bool consumeUntil(const char delimiter);
 
-   BencodeValue parse();
-
 private:
     /// The torrent file
     std::string torrent_;
@@ -83,13 +94,16 @@ private:
     std::string announce_;
 
     /// Vector to hold the file contents
-    std::vector<uint8_t> buffer_;
+    std::shared_ptr<std::vector<uint8_t>> buffer_;
 
     /// Position in the buffer
     int pos_;
     
     /// A dictionary of decoded bencode data
     std::map<std::string, BencodeValue> info_dict_;
+
+    /// Callback block for decoder
+    Callbacks callbacks_;
 };
 
 }; /// namespace bittorrent

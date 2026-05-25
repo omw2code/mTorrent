@@ -19,6 +19,21 @@ const TorrentMetaInfo& TorrentManager::getMetaInfo()
    return meta_info_;
 }
 
+void BencodeDecoder::loadTorrent(const std::string &filename)
+{
+    // Safely use binary mode
+    std::filesystem::path file_path(filename);
+    std::ifstream file(filename, std::ios::binary);
+    if (!file.is_open())
+    {
+       throw std::runtime_error("Error opening torrent file");
+    }
+
+    // Replace and store the contents of the file into a buffer
+    buffer_.assign(std::istreambuf_iterator<char>(file),
+                   std::istreambuf_iterator<char>());
+}
+
 void TorrentManager::loadTorrent(const std::string &torrent)
 {
     try
