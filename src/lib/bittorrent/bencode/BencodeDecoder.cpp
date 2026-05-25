@@ -10,6 +10,7 @@ BencodeDecoder::BencodeDecoder()
     , pos_{}
     , info_dict_{}
     , callbacks_{}
+    , buffer_{std::make_shared<std::vector<uint8_t>>()}
 {}
 
 void BencodeDecoder::setCallbacks(Callbacks &&callbacks)
@@ -20,6 +21,13 @@ void BencodeDecoder::setCallbacks(Callbacks &&callbacks)
 void BencodeDecoder::setBuffer(const std::shared_ptr<std::vector<uint8_t>> &buffer)
 {
     buffer_ = buffer;
+    pos_ = 0;
+}
+
+void BencodeDecoder::setBencode(const std::string_view &data)
+{
+    buffer_->clear();
+    buffer_->assign(data.begin(), data.end());
     pos_ = 0;
 }
 
