@@ -22,7 +22,7 @@ public:
         , raw_info_bytes{}
     {};
 
-    using SHA1hash = std::array<std::byte, 20>;
+    using SHA1hash = std::string;
     using ByteBuffer = std::vector<std::byte>;
 
     /// For the purposes of the other keys, the multi-file case is 
