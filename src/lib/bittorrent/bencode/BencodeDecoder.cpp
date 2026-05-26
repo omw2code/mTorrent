@@ -80,6 +80,8 @@ BencodeValue BencodeDecoder::dispatch()
            throw std::runtime_error("Invalid or unexpected byte: ");
         }
     }
+
+    /// Save the range for this node
     result.source_range = {
         .start = start,
         .end = pos_
