@@ -13,11 +13,13 @@ TorrentManager::TorrentManager()
     : torrent_{}
     , decoder_{}
     , meta_info_{}
+    , buffer_{std::make_unique<std::vector<uint8_t>>()}
 {
     BencodeDecoder::Callbacks callbacks;
-    callbacks.on_decode_callback = [this](const BencodeValue &meta){
-        readTorrent();
+    callbacks.on_decode_callback = [this](const BencodeValue &data){
+        extractMetaInfo(data);
     };
+    decoder_.setCallbacks(std::move(callbacks));
 }
 
 
@@ -40,6 +42,7 @@ void TorrentManager::loadTorrent(const std::string &filename)
     // Replace and store the contents of the file into a buffer
     buffer_->assign(std::istreambuf_iterator<char>(file),
                    std::istreambuf_iterator<char>());
+    decoder_.setBuffer(buffer_);
 }
 
 
@@ -51,7 +54,14 @@ void TorrentManager::readTorrent()
     }
     
     /// Decode the torrent
-    decoder_.decode();
+    try
+    {
+        decoder_.decode();
+    }
+    catch (const std::runtime_error &err)
+    {
+        errorDebug(err.what());
+    }
 }
 
 void TorrentManager::extractMetaInfo(const BencodeValue &data)
