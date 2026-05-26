@@ -53,29 +53,39 @@ BencodeValue BencodeDecoder::dispatch()
         throw std::runtime_error("Unexpected end of buffer");
     }
 
+    /// Init source range for bencode node
+    size_t start = pos_;
+
     // Iterate through the buffer
     char c = (*buffer_)[pos_];
+    BencodeValue result;
     switch (c)
     {
     case 'i':
-        return handleInt();
+        result = handleInt();
         break;
     case 'l':
-        return handleList();
+        result = handleList();
         break;
     case 'd':
-        return handleDict();
+        result = handleDict();
         break;
     default:
         if (std::isdigit(static_cast<unsigned char>(c)))
         {
-            return handleString();
+            result = handleString();
         }
         else
         {
            throw std::runtime_error("Invalid or unexpected byte: ");
         }
     }
+    result.source_range = {
+        .start = start,
+        .end = pos_
+    };
+
+    return result;
 }
 
 BencodeValue BencodeDecoder::handleString()

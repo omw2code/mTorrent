@@ -97,7 +97,7 @@ private:
     std::shared_ptr<std::vector<uint8_t>> buffer_;
 
     /// Position in the buffer
-    int pos_;
+    size_t pos_;
     
     /// A dictionary of decoded bencode data
     std::map<std::string, BencodeValue> info_dict_;

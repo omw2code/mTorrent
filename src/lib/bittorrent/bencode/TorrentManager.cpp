@@ -203,7 +203,7 @@ void TorrentManager::grabMetaInfo(const std::unordered_map<std::string, BencodeV
     }
 }
 
-uint8_t TorrentManager::deserialize(const std::string &hash)
+TorrentManager::Sha1Hash TorrentManager::generateInfoHash(const std::span<const std::byte> &raw_info_hash)
 {
     /// Deserialize the SHA1 hash
 }

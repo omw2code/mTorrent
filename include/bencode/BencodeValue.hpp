@@ -22,6 +22,12 @@ public:
         BencodeDict>;
         
     variant_type value;
+    struct SourceRange
+    {
+        size_t start{};
+        size_t end{};
+    } source_range;
+    
 
     BencodeValue() = default;
     BencodeValue(int64_t num) : value(num) {};
