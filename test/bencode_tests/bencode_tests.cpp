@@ -28,7 +28,7 @@ TEST(BencodeDecoderString, DecodeString)
     ASSERT_EQ(std::get<std::string>(actual_data.value), "the_thing");
 }
 
-/*
+
 /// Integers are represented by an 'i' followed by the number 
 /// in base 10 followed by an 'e'. For example i3e corresponds 
 /// to 3 and i-3e corresponds to -3. Integers have no size limitation. 
@@ -36,9 +36,10 @@ TEST(BencodeDecoderString, DecodeString)
 /// are invalid, other than i0e, which of course corresponds to 0.
 TEST(BecondeDecoderInt, DecodeInt)
 {
-    constexpr std::string_view bencode_uInt{"i3e"};
+    constexpr std::span<const char> bencode_lit{"i3e"};
+    const std::span<const std::byte> bencode_bytes{std::as_bytes(bencode_lit)};
     bittorrent::BencodeDecoder decoder{};
-    decoder.setBencode(bencode_uInt);
+    decoder.setBuffer(bencode_bytes);
 
     /// Decoded value we want to catch
     bittorrent::BencodeValue actual_data;
@@ -55,7 +56,7 @@ TEST(BecondeDecoderInt, DecodeInt)
     ASSERT_EQ(std::get<int64_t>(actual_data.value), 3);
 
 }
-
+/*
 TEST(BecondeDecoderInt, DecodeNegative)
 {
     constexpr std::string_view bencode_uInt{"i-3e"};
