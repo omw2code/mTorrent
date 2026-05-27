@@ -171,12 +171,12 @@ TEST(BencodeDecoderList, DecodeStringList)
     }
 }
 
-/*
 TEST(BencodeDecoderList, DecodeMultiTypeList)
 {
-    constexpr std::string_view bencode_list{"l4:spami4e4:eggse"};
+    constexpr std::span<const char> bencode_lit{"l4:spami4e4:eggse"};
+    const std::span<const std::byte> bencode_bytes{std::as_bytes(bencode_lit)};
     bittorrent::BencodeDecoder decoder{};
-    decoder.setBencode(bencode_list);
+    decoder.setBuffer(bencode_bytes);
 
     /// Thing to check
     bittorrent::BencodeValue actual_data;
@@ -207,7 +207,7 @@ TEST(BencodeDecoderList, DecodeMultiTypeList)
     static_assert(std::is_same<BenBaseTypeString, std::string>::value);
     ASSERT_EQ(std::get<std::string>(decoded_vec[2].value), "eggs");
 }
-
+/*
 /// Dictionaries are encoded as a 'd' followed by a list of alternating keys and their corresponding values 
 /// followed by an 'e'. For example, d3:cow3:moo4:spam4:eggse corresponds to {'cow': 'moo', 'spam': 'eggs'} 
 /// and d4:spaml1:a1:bee corresponds to {'spam': ['a', 'b']}. Keys must be strings and appear in sorted order 
