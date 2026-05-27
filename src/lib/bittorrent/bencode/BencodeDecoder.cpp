@@ -10,7 +10,7 @@ BencodeDecoder::BencodeDecoder()
     , pos_{}
     , info_dict_{}
     , callbacks_{}
-    , buffer_{std::make_shared<std::vector<uint8_t>>()}
+    , buffer_{}
 {}
 
 void BencodeDecoder::setCallbacks(Callbacks &&callbacks)
@@ -18,16 +18,9 @@ void BencodeDecoder::setCallbacks(Callbacks &&callbacks)
     callbacks_ = std::move(callbacks);
 }
 
-void BencodeDecoder::setBuffer(const std::shared_ptr<std::vector<uint8_t>> &buffer)
+void BencodeDecoder::setBuffer(const std::span<const std::byte> &buffer)
 {
     buffer_ = buffer;
-    pos_ = 0;
-}
-
-void BencodeDecoder::setBencode(const std::string_view &data)
-{
-    buffer_->clear();
-    buffer_->assign(data.begin(), data.end());
     pos_ = 0;
 }
 
@@ -43,12 +36,7 @@ void BencodeDecoder::decode()
 
 BencodeValue BencodeDecoder::dispatch()
 {
-    if (!buffer_)
-    {
-        throw std::runtime_error("Buffer is not initialized");
-    }
-
-    if (pos_ >= buffer_->size())
+    if (pos_ >= buffer_.size())
     {
         throw std::runtime_error("Unexpected end of buffer");
     }
@@ -57,7 +45,7 @@ BencodeValue BencodeDecoder::dispatch()
     size_t start = pos_;
 
     // Iterate through the buffer
-    char c = (*buffer_)[pos_];
+    char c = peekBuffer();
     BencodeValue result;
     switch (c)
     {
@@ -96,14 +84,14 @@ BencodeValue BencodeDecoder::handleString()
     int str_len{};
 
     // Store the string length
-    while(pos_ < buffer_->size() &&
-          std::isdigit(static_cast<unsigned char>((*buffer_)[pos_])))
+    while(pos_ < buffer_.size() &&
+          std::isdigit(static_cast<unsigned char>(peekBuffer())))
     {
-        str_len = (str_len * 10) + ((*buffer_)[pos_] - '0');
+        str_len = (str_len * 10) + (peekBuffer() - '0');
         ++pos_;
     }
     
-    if (pos_ >= buffer_->size() || (*buffer_)[pos_] != ':')
+    if (pos_ >= buffer_.size() || peekBuffer() != ':')
     {
         throw std::runtime_error("Malformed string type");
     }
@@ -111,13 +99,15 @@ BencodeValue BencodeDecoder::handleString()
     // Skip ':'
     ++pos_;
     
-    if (pos_ + str_len > buffer_->size())
+    if (pos_ + str_len > buffer_.size())
     {
         throw std::runtime_error("String length exceeds buffer size");
     }
 
     // Grab the string
-    std::string str(buffer_->begin() + pos_, buffer_->begin() + pos_ + str_len);
+    const char* begin = reinterpret_cast<const char*>(buffer_.data() + pos_);
+    std::string str(begin, str_len);
+
     // Advance the index
     pos_ += str_len;
 
@@ -133,34 +123,34 @@ BencodeValue BencodeDecoder::handleInt()
 
     /// Check for signess 
     bool negative{false};
-    if (pos_ < buffer_->size() && (*buffer_)[pos_] == '-')
+    if (pos_ < buffer_.size() && peekBuffer() == '-')
     {
         negative = true;
         ++pos_;
     }
 
     bool leading_zero{false};
-    while (pos_ < buffer_->size() &&
-           std::isdigit(static_cast<unsigned char>((*buffer_)[pos_])))
+    while (pos_ < buffer_.size() &&
+           std::isdigit(static_cast<unsigned char>(peekBuffer())))
     {
         /// Check if there was a leading zero
         if (leading_zero)
         {
             throw std::runtime_error("Invalid integer, leading zero integers are invalid");
         }
-        num = (num * 10) + ((*buffer_)[pos_] - '0');
+        num = (num * 10) + (peekBuffer() - '0');
         leading_zero = num == 0;
         ++pos_;
     }
     
     // Check bounds
-    if (pos_ >= buffer_->size())
+    if (pos_ >= buffer_.size())
     {
         throw std::runtime_error("Int exceeds buffer size");
     }
 
     // Ensure the data was fully read
-    if ((*buffer_)[pos_] != 'e')
+    if (peekBuffer() != 'e')
     {
         std::runtime_error("Malformed int type");
     }
@@ -176,17 +166,17 @@ BencodeValue BencodeDecoder::handleList()
     // Move pas 'l'
     ++pos_;
    BencodeValue::BencodeList list;
-    while (pos_ < buffer_->size() && (*buffer_)[pos_] != 'e')
+    while (pos_ < buffer_.size() && peekBuffer() != 'e')
     {
         list.push_back(dispatch());
     }
     
-    if (pos_ >= buffer_->size())
+    if (pos_ >= buffer_.size())
     {
         throw std::runtime_error("Unexpected end of buffer when parsing list");
     }
     
-    if ((*buffer_)[pos_] != 'e')
+    if (peekBuffer() != 'e')
     {
         throw std::runtime_error("Malformed list type");
     }
@@ -202,15 +192,20 @@ BencodeValue BencodeDecoder::handleDict()
     // Move past 'd'
     ++pos_;
     BencodeValue::BencodeDict dict;
-    while(pos_ < buffer_->size() && (*buffer_)[pos_] != 'e')
+    while(pos_ < buffer_.size() && peekBuffer() != 'e')
     {
-        char c = (*buffer_)[pos_];
+        char c = std::to_integer<char>(buffer_[pos_]);
         auto key = std::get<std::string>(dispatch().value); 
         auto val = dispatch();
         dict[key] = val;
     }
     ++pos_;
     return BencodeValue(std::move(dict));
+}
+
+char BencodeDecoder::peekBuffer() const 
+{
+    return std::to_integer<char>(buffer_[pos_]);
 }
 
 }; /// namespace bittorrent

@@ -1,6 +1,7 @@
 #ifndef BENCODE_DECODER_HPP
 #define BENCODE_DECODER_HPP
 
+#include <span>
 #include <memory>
 #include <string>
 #include <vector>
@@ -34,13 +35,11 @@ public:
     
     void setTorrent(const std::string &filename);
 
-    void setBencode(const std::string_view &beconde);
-
     void decode();
 
     void setCallbacks(Callbacks &&callbacks);
 
-    void setBuffer(const std::shared_ptr<std::vector<uint8_t>> &buffer);
+    void setBuffer(const std::span<const std::byte> &buffer);
 
     /**
      * \brief Read torrent file to be decoded
@@ -50,6 +49,9 @@ public:
     void loadTorrent(const std::string &filename);
 
 private:
+
+    char peekBuffer() const;
+
     BencodeValue dispatch();
     /**
      * \brief Decode bencoded string types in UTF-8 format
@@ -94,7 +96,7 @@ private:
     std::string announce_;
 
     /// Vector to hold the file contents
-    std::shared_ptr<std::vector<uint8_t>> buffer_;
+    std::span<const std::byte> buffer_;
 
     /// Position in the buffer
     size_t pos_;
