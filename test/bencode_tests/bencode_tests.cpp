@@ -136,14 +136,14 @@ TEST(BencodeDecoderInt, DecodeLargeInt)
     ASSERT_EQ(std::get<int64_t>(actual_data.value), -1000000000000);
 }
 
-/*
 /// Lists are encoded as an 'l' followed by their elements (also bencoded) followed
 ///  by an 'e'. For example l4:spam4:eggse corresponds to ['spam', 'eggs'].
 TEST(BencodeDecoderList, DecodeStringList)
 {
-    constexpr std::string_view bencode_list{"l4:spam4:eggse"};
+    constexpr std::span<const char> bencode_lit{"l4:spam4:eggse"};
+    const std::span<const std::byte> bencode_bytes{std::as_bytes(bencode_lit)};
     bittorrent::BencodeDecoder decoder{};
-    decoder.setBencode(bencode_list);
+    decoder.setBuffer(bencode_bytes);
 
     /// Thing to check
     bittorrent::BencodeValue actual_data;
@@ -171,7 +171,7 @@ TEST(BencodeDecoderList, DecodeStringList)
     }
 }
 
-
+/*
 TEST(BencodeDecoderList, DecodeMultiTypeList)
 {
     constexpr std::string_view bencode_list{"l4:spami4e4:eggse"};
