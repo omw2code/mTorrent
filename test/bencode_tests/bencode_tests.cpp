@@ -106,12 +106,13 @@ TEST(BecondeDecoderInt, DecodeInvalidInt)
     EXPECT_THROW(decoder.decode(), std::runtime_error);
 }
 
-/*
+
 TEST(BencodeDecoderInt, DecodeLargeInt)
 {
-    constexpr std::string_view bencode_int{"i1000000000000e"};
+    constexpr std::span<const char> bencode_lit{"i1000000000000e"};
+    std::span<const std::byte> bencode_bytes{std::as_bytes(bencode_lit)};
     bittorrent::BencodeDecoder decoder{};
-    decoder.setBencode(bencode_int);
+    decoder.setBuffer(bencode_bytes);
    
     /// Checking this value
     bittorrent::BencodeValue actual_data;
@@ -126,14 +127,16 @@ TEST(BencodeDecoderInt, DecodeLargeInt)
     ASSERT_EQ(std::get<int64_t>(actual_data.value), 1000000000000);
 
     /// Set a new piece of data
-    constexpr std::string_view bencode_neg{"i-1000000000000e"};
-    decoder.setBencode(bencode_neg);
+    constexpr std::span<const char> bencode_Nlit{"i-1000000000000e"};
+    bencode_bytes = std::as_bytes(bencode_Nlit);
+    decoder.setBuffer(bencode_bytes);
 
     /// Decode and assert
     decoder.decode();
     ASSERT_EQ(std::get<int64_t>(actual_data.value), -1000000000000);
 }
 
+/*
 /// Lists are encoded as an 'l' followed by their elements (also bencoded) followed
 ///  by an 'e'. For example l4:spam4:eggse corresponds to ['spam', 'eggs'].
 TEST(BencodeDecoderList, DecodeStringList)
