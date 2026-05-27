@@ -79,13 +79,14 @@ TEST(BecondeDecoderInt, DecodeNegative)
     ASSERT_EQ(std::get<int64_t>(actual_data.value), -3);
 }
 
-/*
+
 TEST(BecondeDecoderInt, DecodeInvalidInt)
 {
     /// Leading 0's are invalid 
-    constexpr std::string_view bencode_Int{"i-03e"};
+    constexpr std::span<const char> bencode_lit{"i-03e"};
+    std::span<const std::byte> bencode_bytes{std::as_bytes(bencode_lit)};
     bittorrent::BencodeDecoder decoder{};
-    decoder.setBencode(bencode_Int);
+    decoder.setBuffer(bencode_bytes);
 
     // Thing to check
     bittorrent::BencodeValue actual_data;
@@ -99,12 +100,13 @@ TEST(BecondeDecoderInt, DecodeInvalidInt)
     EXPECT_THROW(decoder.decode(), std::runtime_error);
 
     /// Change it up with a positive number
-    constexpr std::string_view bencode_uInt{"i03e"};
-    decoder.setBencode(bencode_uInt);
+    constexpr std::span<const char> bencode_Nlit{"i03e"};
+    bencode_bytes = std::as_bytes(bencode_Nlit);
+    decoder.setBuffer(bencode_bytes);
     EXPECT_THROW(decoder.decode(), std::runtime_error);
 }
 
-
+/*
 TEST(BencodeDecoderInt, DecodeLargeInt)
 {
     constexpr std::string_view bencode_int{"i1000000000000e"};
