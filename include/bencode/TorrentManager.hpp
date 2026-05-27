@@ -42,7 +42,7 @@ private:
     BencodeDecoder decoder_;
     TorrentMetaInfo meta_info_;
     static constexpr int hash_size_{20};
-    std::shared_ptr<std::vector<uint8_t>> buffer_;
+    std::vector< std::byte> buffer_;
 };
 
 } /// namespace bittorrent

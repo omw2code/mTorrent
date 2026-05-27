@@ -13,7 +13,7 @@ TorrentManager::TorrentManager()
     : torrent_{}
     , decoder_{}
     , meta_info_{}
-    , buffer_{std::make_unique<std::vector<uint8_t>>()}
+    , buffer_{}
 {
     BencodeDecoder::Callbacks callbacks;
     callbacks.on_decode_callback = [this](const BencodeValue &data){
@@ -40,8 +40,17 @@ void TorrentManager::loadTorrent(const std::string &filename)
     }
 
     // Replace and store the contents of the file into a buffer
-    buffer_->assign(std::istreambuf_iterator<char>(file),
-                   std::istreambuf_iterator<char>());
+    std::vector<char> is_vec{std::istreambuf_iterator<char>(file),
+                             std::istreambuf_iterator<char>()};
+
+    /// Convert this to bytes cause this is char
+    buffer_.resize(is_vec.size());
+    std::transform(is_vec.begin(), is_vec.end(), buffer_.begin(),
+        [](char c) {
+            return std::byte{static_cast<unsigned char>(c)};
+        });
+
+    /// Set up the buffer in the decoder to decode this
     decoder_.setBuffer(buffer_);
 }
 
