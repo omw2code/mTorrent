@@ -38,6 +38,9 @@ public:
         std::string path{};
     };
 
+    /// The exact dictionary info hash used to communicate with the swarm
+    ByteBuffer raw_info_bytes;
+
     /// URL of the tracker
     std::string announce;
     
@@ -56,7 +59,7 @@ public:
     /// pieces maps to a string whose length is a multiple of 20. 
     /// It is to be subdivided into strings of length 20, each of 
     /// which is the SHA1 hash of the piece at the corresponding index.
-    std::vector<SHA1hash> pieces;
+    std::vector<std::string> pieces;
     
     /// There is also a key length or a key files, but not both or neither. 
     /// If length is present then the download represents a single file, 
@@ -64,8 +67,6 @@ public:
     std::optional<uint64_t> length;
     std::optional<std::vector<File>> files;
     
-    /// The exact dictionary info hash used to communicate with the swarm
-    ByteBuffer raw_info_bytes;
 };
 
 } /// namespace bittorrent
