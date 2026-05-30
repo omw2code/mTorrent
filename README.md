@@ -1,3 +1,3 @@
 # mTorrent Client
-A more modern and modular approach to the BitTorrent protocol using modern
+A modern approach to the BitTorrent protocol using modern
 C++ standards.
