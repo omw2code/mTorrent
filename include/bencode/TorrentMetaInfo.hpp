@@ -19,10 +19,11 @@ public:
         , pieces{}
         , length{}
         , files{}
-        , raw_info_bytes{}
+        , info_hash{}
     {};
-
-    using SHA1hash = std::string;
+    
+    /// TODO: remove the fixed size and add hash size types
+    using ShaHash = std::array<std::byte, 20>;
     using ByteBuffer = std::vector<std::byte>;
 
     /// For the purposes of the other keys, the multi-file case is 
@@ -39,7 +40,7 @@ public:
     };
 
     /// The exact dictionary info hash used to communicate with the swarm
-    ByteBuffer raw_info_bytes;
+    ShaHash info_hash;
 
     /// URL of the tracker
     std::string announce;

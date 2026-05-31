@@ -113,7 +113,7 @@ void TorrentManager::grabMetaInfo(const std::unordered_map<std::string, BencodeV
         throw std::runtime_error("Failed to find info key in torrent");
     }
     auto [start, end] = it->second.source_range;
-    //meta_info_.raw_info_bytes = generateHash(buffer_, start, end);
+    meta_info_.info_hash = generateHash(buffer_, start, end);
 
     auto info_dict = std::get<std::unordered_map<std::string, BencodeValue>>(it->second.value);
     it = info_dict.find("name");
