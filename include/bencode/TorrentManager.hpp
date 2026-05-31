@@ -33,7 +33,7 @@ private:
     
     uint8_t deserialize(const std::string &hash);
 
-    Sha1Hash generateInfoHash(const std::span<const std::byte> torrent_data, const size_t start, const size_t end) const ; 
+    Sha1Hash generateHash(const std::span<const std::byte> torrent_data, const size_t start, const size_t end) const ; 
     
     void errorDebug(const std::string &err) const; 
 

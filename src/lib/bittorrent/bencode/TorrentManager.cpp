@@ -3,6 +3,7 @@
 #include <iostream>
 #include <algorithm>
 #include <string>
+#include <openssl/evp.h>
 #include <bencode/TorrentManager.hpp>
 #include <bencode/BencodeValue.hpp>
 
@@ -111,6 +112,8 @@ void TorrentManager::grabMetaInfo(const std::unordered_map<std::string, BencodeV
     {
         throw std::runtime_error("Failed to find info key in torrent");
     }
+    auto [start, end] = it->second.source_range;
+    //meta_info_.raw_info_bytes = generateHash(buffer_, start, end);
 
     auto info_dict = std::get<std::unordered_map<std::string, BencodeValue>>(it->second.value);
     it = info_dict.find("name");
@@ -212,9 +215,51 @@ void TorrentManager::grabMetaInfo(const std::unordered_map<std::string, BencodeV
     }
 }
 
-TorrentManager::Sha1Hash TorrentManager::generateInfoHash(const std::span<const std::byte> &raw_info_hash)
+TorrentManager::Sha1Hash TorrentManager::generateHash(
+    const std::span<const std::byte> torrent_data,
+    const size_t start,
+    const size_t end) const
 {
-    /// Deserialize the SHA1 hash
+    /// Grab the subspan
+    std::vector<std::byte> hash{};
+    const auto sub_span = torrent_data.subspan(start, end);
+
+    /// Encode the data
+    const size_t digest_size = sub_span.size();
+    unsigned char digest[digest_size];
+    EVP_MD_CTX context = EVP_MD_CTX_new();
+    if (context == nullptr)
+    {
+        throw std::runtime_error("Problem occured when allocating a digest context");
+    }
+    
+    int rc = EVP_DigestInit_ex(context, EVP_sha1(), nullptr);
+    if (rc != 1)
+    {
+        EVP_MD_CTX_free(context);
+        throw std::runtime_error("Problem initializing digest type");
+    }
+
+    rc = EVP_DigestUpdate(
+        context, 
+        reinterpret_cast<unsigned char>(sub_span.data()),
+        sub_span.size());
+    if (rc != 1)
+    {
+        EVP_MD_CTX_free(context);
+        throw std::runtime_error("Problem updating data to be digested");
+    }
+    
+    rc = EVP_DigestFinal_ex(context, digest, &digest_size);
+    if (rc != 1)
+    {
+        EVP_MD_CTX_free(context);
+        throw std::runtime_error("Problem computing final hash digest");
+    }
+
+
+    /// Elided
+    return hash;
 }
 
 void TorrentManager::errorDebug(const std::string &err) const
