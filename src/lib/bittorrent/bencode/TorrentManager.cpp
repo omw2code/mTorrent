@@ -215,24 +215,24 @@ void TorrentManager::grabMetaInfo(const std::unordered_map<std::string, BencodeV
     }
 }
 
-TorrentManager::Sha1Hash TorrentManager::generateHash(
+TorrentManager::ShaHash TorrentManager::generateHash(
     const std::span<const std::byte> torrent_data,
     const size_t start,
     const size_t end) const
 {
     /// Grab the subspan
-    std::vector<std::byte> hash{};
     const auto sub_span = torrent_data.subspan(start, end);
 
     /// Encode the data
-    const size_t digest_size = sub_span.size();
-    unsigned char digest[digest_size];
-    EVP_MD_CTX context = EVP_MD_CTX_new();
+    ShaHash hash{};
+    unsigned int hash_len = hash.size();
+    EVP_MD_CTX *context = EVP_MD_CTX_new();
     if (context == nullptr)
     {
         throw std::runtime_error("Problem occured when allocating a digest context");
     }
     
+    /// TODO: dynamically change the hash based on the version of bittorrent being used
     int rc = EVP_DigestInit_ex(context, EVP_sha1(), nullptr);
     if (rc != 1)
     {
@@ -242,21 +242,25 @@ TorrentManager::Sha1Hash TorrentManager::generateHash(
 
     rc = EVP_DigestUpdate(
         context, 
-        reinterpret_cast<unsigned char>(sub_span.data()),
-        sub_span.size());
+        sub_span.data(),
+        sub_span.size());        
     if (rc != 1)
     {
         EVP_MD_CTX_free(context);
         throw std::runtime_error("Problem updating data to be digested");
     }
     
-    rc = EVP_DigestFinal_ex(context, digest, &digest_size);
+    rc = EVP_DigestFinal_ex(
+        context, 
+        reinterpret_cast<unsigned char*>(hash.data()), 
+        &hash_len);
     if (rc != 1)
     {
         EVP_MD_CTX_free(context);
         throw std::runtime_error("Problem computing final hash digest");
     }
 
+    EVP_MD_CTX_free(context);
 
     /// Elided
     return hash;

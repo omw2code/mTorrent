@@ -15,7 +15,7 @@ class TorrentManager
 {
 public:
     
-    using Sha1Hash = std::array<std::byte, 20>;
+    using ShaHash = std::array<std::byte, 20>;
 
     TorrentManager();
     
@@ -33,7 +33,7 @@ private:
     
     uint8_t deserialize(const std::string &hash);
 
-    Sha1Hash generateHash(const std::span<const std::byte> torrent_data, const size_t start, const size_t end) const ; 
+    ShaHash generateHash(const std::span<const std::byte> torrent_data, const size_t start, const size_t end) const ; 
     
     void errorDebug(const std::string &err) const; 
 
