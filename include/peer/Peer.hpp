@@ -11,7 +11,7 @@ namespace dht
 class Peer
 {
 public:
-    Peer() = default;
+    Peer();
 
 };
 

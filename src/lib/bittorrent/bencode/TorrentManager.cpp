@@ -223,7 +223,7 @@ TorrentManager::ShaHash TorrentManager::generateHash(
     /// Grab the subspan
     const auto sub_span = torrent_data.subspan(start, end);
 
-    /// Encode the data
+    /// Hash the data
     ShaHash hash{};
     unsigned int hash_len = hash.size();
     EVP_MD_CTX *context = EVP_MD_CTX_new();
