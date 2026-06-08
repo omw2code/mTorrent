@@ -2,6 +2,7 @@
 #define __HANDSHAKE_HPP__
 
 #include <span>
+#include <optional>
 #include <vector>
 
 namespace bittorrent
@@ -17,8 +18,8 @@ public:
         uint8_t prefix_length{19};
         std::string protocol{"BitTorrent protocol"};
         std::vector<const std::byte> reserved('\0x00', 8);
-        ShaHash info_hash{};
-        PeerId id{};
+        std::optional<ShaHash> info_hash{};
+        std::optional<PeerId> id{};
     };
 
     /*
