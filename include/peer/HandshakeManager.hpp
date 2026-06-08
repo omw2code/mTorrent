@@ -21,11 +21,37 @@ public:
         PeerId id{};
     };
 
-    ByteBuffer serialize(const Handshake &protocol);
+    /*
+    * \brief Serialize the handshake set via setProtocol
+    *        or defaulted to version 1 of the bittorrent protocol
+    *
+    * \return The full encoded handshake
+    */
+    ByteBuffer serialize();
 
-    Sync deserialize(const std::span<const std::byte> &message);
+    /*
+    * \brief Deserialize the handshake received from another peer
+    *
+    * \return The deserialized handshake, throws if handshake
+    *         is malformed
+    */
+    Handshake deserialize(const std::span<const std::byte> &message);
 
+    /*
+    *
+    * \brief Sets the handshake to use when joining a swarm
+    *
+    */
     void setProtocol(Handshake &&handshake);
+
+private:
+
+    /*
+    *
+    * \brief Assemble the handshake recieved from a peer
+    *
+    */
+    void assembleHandshake(const std::byte byte, Handshake &rx_handshake);
 
 private:
 
@@ -47,8 +73,10 @@ private:
         uint8_t count{};
     };
 
+    /// Internally stored state information
     State state_{};
 
+    /// Handshake protocol to use
     Handshake handshake_protocol_{};
       
 }; /// class Handshake
