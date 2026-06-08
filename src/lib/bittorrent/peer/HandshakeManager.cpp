@@ -52,13 +52,16 @@ Handshake::ByteBuffer Handshake::serialize()
     return buffer;
 }
 
-Handshake::deserialize(const std::span<const byte> &message)
+HandshakeManager::Handshake HandshakeManager::deserialize(const std::span<const byte> &message)
 {
     Handshake rx_handshake{};
     for (const auto byte : message)
     {
         assembleHandshake(byte, rx_handshake);
     }
+
+    /// Elided
+    return rx_handshake;
 }
 
 Handshake::assembleHandshake(const std::byte byte, Handshake &rx_handshake)
