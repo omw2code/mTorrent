@@ -9,27 +9,30 @@ void Handshake::setProtocol(Handshake &&handshake_protocol)
     handshake_protocol_ = std::move(handshake_protocol);
 }
 
-Handshake::ByteBuffer Handshake::serialize(const Handshake &protocol)
+Handshake::ByteBuffer Handshake::serialize()
 {
     ByteBuffer buffer{};
 
-    /// Start byte '19'
-    buffer.append(LEN_PREFIX);
+    /// Start byte
+    buffer.append(std::byte{handshake_protocol_.prefix_length});
 
     /// Bittorrent protocol
-    std::foreach(protocol_.begin(), protocol_.end(), std::back_inserter(buffer),
+    std::foreach(
+        handshake_protocol_.protocol_.begin(), 
+        handshake_protocol_.protocol_.end(), 
+        std::back_inserter(buffer),
         [this](char byte) {
             return static_cast<unsigned char>(byte);
-        };
+        });
     
     /// Add reserved bytes
-    buffer.append_range(reserved_);
+    buffer.append_range(handshake_protocol_.reserved_);
 
     /// Append the hash
-    buffer.append_range(message.info_hash);
+    buffer.append_range(handshake_protocol_.info_hash);
 
     /// Append the id
-    buffer.append_range(message.id);
+    buffer.append_range(handshake_protocol_.id);
 
     /// Elided
     return buffer;
