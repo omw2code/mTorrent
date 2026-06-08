@@ -3,7 +3,13 @@
 namespace bittorrent
 {
 
-Handshake::ByteBuffer Handshake::serialize(const Sync &message)
+
+void Handshake::setProtocol(Handshake &&handshake_protocol)
+{
+    handshake_protocol_ = std::move(handshake_protocol);
+}
+
+Handshake::ByteBuffer Handshake::serialize(const Handshake &protocol)
 {
     ByteBuffer buffer{};
 
@@ -40,9 +46,10 @@ Handshake::deserialize(const std::span<const byte> &message)
 
 Handshake::assembleHandshake(const std::byte byte, Handshake &rx_handshake)
 {
-    switch (state_)
+    switch (state_.seq)
     {
-        using namesapce  
+        using namesapce HandshakeSeq;
+
     case LEN_PREFIX:
     {
         if (byte != LEN_PREFIX)
@@ -56,14 +63,37 @@ Handshake::assembleHandshake(const std::byte byte, Handshake &rx_handshake)
     }
     case PROTOCOL:
     {
-        if (rx_handshake.protocol.size() > LEN_PREFIX)
+        /// Build the protocol we are using
+        rx_handshake.protocol.append(std::to_integer<char>(byte);
+
+        /// Did we get all our data?
+        if (rx_handshake.protocol.size() == rx_handshake.prefix_length &&
+            rx_handshake.protocol == protocol_.data())
         {
-            reset();
-            throw std::runtime_error("Malformed header: protocol type");
+            /// Next state
+            state_ = PADDING;
         }
+        else if (handshake.protocol().size() > rx_handshake.prefix_length
+        {
+            throw std::runtime_error("Malformed packet: protocol length exceeded");
+        }
+        break;
     }
     case PADDING:
     {
+        ++state_.count;
+
+        /// Ensure we are checking custom protocols
+        if (handshake_protocol_.reserved.size() > state_.count ||
+            handshake_protocol_.reserved[state_.count] != byte)
+        {
+            throw std::runtime_error("Malformed packet: padded byte protocol not supported");
+        }
+        else if (handshake_protocol.reserved.size() == state_.count)
+        {
+            state_.seq = INFO_HASH;
+        }
+        break;
     }
     case INFO_HASH:
     {
