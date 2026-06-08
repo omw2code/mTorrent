@@ -84,7 +84,7 @@ Handshake::assembleHandshake(const std::byte byte, Handshake &rx_handshake)
         ++state_.count;
 
         /// Ensure we are checking custom protocols
-        if (handshake_protocol_.reserved.size() > state_.count ||
+        if (handshake_protocol_.reserved.size() < state_.count ||
             handshake_protocol_.reserved[state_.count] != byte)
         {
             throw std::runtime_error("Malformed packet: padded byte protocol not supported");
