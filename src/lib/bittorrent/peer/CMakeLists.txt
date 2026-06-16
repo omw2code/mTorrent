@@ -1,9 +1,9 @@
-add_library(peer)
+add_library(peer_lib)
 
-target_sources(peer
+target_sources(peer_lib
   PRIVATE
   Peer.cpp)
 
-target_include_directories(peer
+target_include_directories(peer_lib
   PUBLIC
   $<BUILD_INTERFACE:${INCLUDE_DIR}>)

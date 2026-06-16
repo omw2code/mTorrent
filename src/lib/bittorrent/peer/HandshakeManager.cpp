@@ -9,7 +9,7 @@ void Handshake::setProtocol(Handshake &&handshake_protocol)
     handshake_protocol_ = std::move(handshake_protocol);
 }
 
-Handshake::ByteBuffer Handshake::serialize()
+HandshakeManager::ByteBuffer Handshake::serialize()
 {
     ByteBuffer buffer{};
 
