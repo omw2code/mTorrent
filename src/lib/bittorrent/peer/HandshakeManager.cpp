@@ -1,37 +1,40 @@
 #include <cstddef>
+#include <algorithm>
+#include <peer/HandshakeManager.hpp>
 
 namespace bittorrent
 {
-
-
-void Handshake::setProtocol(Handshake &&handshake_protocol)
+namespace peer
 {
-    handshake_protocol_ = std::move(handshake_protocol);
+
+void HandshakeManager::setProtocol(Handshake &&handshake_protocol)
+{
+    handshake_ = std::move(handshake_protocol);
 }
 
-HandshakeManager::ByteBuffer Handshake::serialize()
+HandshakeManager::ByteBuffer HandshakeManager::serialize()
 {
     ByteBuffer buffer{};
 
     /// Start byte
-    buffer.append(std::byte{handshake_protocol_.prefix_length});
+    buffer.push_back(std::byte{handshake_.prefix_length});
 
     /// Bittorrent protocol
-    std::foreach(
-        handshake_protocol_.protocol_.begin(), 
-        handshake_protocol_.protocol_.end(), 
+    std::transform(
+        handshake_.protocol.begin(), 
+        handshake_.protocol.end(), 
         std::back_inserter(buffer),
         [this](char byte) {
-            return static_cast<unsigned char>(byte);
+            return static_cast<std::byte>(byte);
         });
     
     /// Add reserved bytes
-    buffer.append_range(handshake_protocol_.reserved_);
+    buffer.append_range(handshake_.reserved);
 
     /// Append the hash
-    if (handshake_protocol_.info_hash.has_value())
+    if (handshake_.info_hash.has_value())
     {
-        buffer.append_range(handshake_protocol_.info_hash);
+        buffer.append_range(handshake_.info_hash.value());
     }
     else
     {
@@ -39,9 +42,9 @@ HandshakeManager::ByteBuffer Handshake::serialize()
     }
 
     /// Append the id
-    if (handshake_protocol_.id.has_value())
+    if (handshake_.id.has_value())
     {
-        buffer.append_range(handshake_protocol_.id);
+        buffer.append_range(handshake_.id.value());
     }
     else
     {
@@ -52,7 +55,7 @@ HandshakeManager::ByteBuffer Handshake::serialize()
     return buffer;
 }
 
-HandshakeManager::Handshake HandshakeManager::deserialize(const std::span<const byte> &message)
+HandshakeManager::Handshake HandshakeManager::deserialize(const std::span<const std::byte> &message)
 {
     Handshake rx_handshake{};
     for (const auto byte : message)
@@ -64,36 +67,36 @@ HandshakeManager::Handshake HandshakeManager::deserialize(const std::span<const 
     return rx_handshake;
 }
 
-Handshake::assembleHandshake(const std::byte byte, Handshake &rx_handshake)
+void HandshakeManager::assembleHandshake(const std::byte byte, Handshake &rx_handshake)
 {
     switch (state_.seq)
     {
-        using namesapce HandshakeSeq;
+        using enum HandshakeManager::HandshakeSeq;
 
     case LEN_PREFIX:
     {
-        if (byte != LEN_PREFIX)
+        if (byte != static_cast<std::byte>(LEN_PREFIX))
         {
             reset();
             throw std::runtime_error("Malformed header: prefix length");
         };
         rx_handshake.prefix_length = std::to_integer<int>(byte);
-        state_ = PROTOCOL;
+        state_.seq = PROTOCOL;
         break;
     }
     case PROTOCOL:
     {
         /// Build the protocol we are using
-        rx_handshake.protocol.append(std::to_integer<char>(byte);
+        rx_handshake.protocol.push_back(std::to_integer<char>(byte));
 
         /// Did we get all our data?
         if (rx_handshake.protocol.size() == rx_handshake.prefix_length &&
-            rx_handshake.protocol == protocol_.data())
+            rx_handshake.protocol == handshake_.protocol.data())
         {
             /// Next state
-            state_ = PADDING;
+            state_.seq = PADDING;
         }
-        else if (handshake.protocol().size() > rx_handshake.prefix_length
+        else if (handshake_.protocol.size() > rx_handshake.prefix_length)
         {
             reset();
             throw std::runtime_error("Malformed packet: protocol length exceeded");
@@ -105,13 +108,13 @@ Handshake::assembleHandshake(const std::byte byte, Handshake &rx_handshake)
         ++state_.count;
 
         /// Ensure we are checking custom protocols
-        if (handshake_protocol_.reserved.size() < state_.count ||
-            handshake_protocol_.reserved[state_.count] != byte)
+        if (handshake_.reserved.size() < state_.count ||
+            handshake_.reserved[state_.count] != byte)
         {
             reset();
             throw std::runtime_error("Malformed packet: padded byte protocol not supported");
         }
-        else if (handshake_protocol.reserved.size() == state_.count)
+        else if (handshake_.reserved.size() == state_.count)
         {
             /// Move onto the next state
             state_.seq = INFO_HASH;
@@ -122,31 +125,42 @@ Handshake::assembleHandshake(const std::byte byte, Handshake &rx_handshake)
     case INFO_HASH:
     {
         ++state_.count;
-        rx_handshake.info_hash.append(byte);
+        if (!rx_handshake.info_hash)
+        {
+            /// Init the optional
+            rx_handshake.info_hash.emplace();
+        }
 
-        if (!handshake_protocol_.info_hash.has_value())
+        rx_handshake.info_hash->push_back(byte);
+
+        if (!handshake_.info_hash.has_value())
         {
             reset();
             throw std::runtime_error("Info hash never set! Cannot compare an unknown info hash!");
         }
-        else if(state.count == handshake_protocol_.info_hash.size())
+        else if(state_.count == handshake_.info_hash->size())
         {
             /// Move onto the next state
             state_.seq = ID;
-            state_count = 0;
+            state_.count = 0;
         }
         break;
     }
     case ID:
     {
         ++state_.count;
+        if (!handshake_.id)
+        {
+            /// Init the optional 
+            handshake_.id.emplace();
+        }
 
         /// For the current implementation, ID's are 20 bytes long
-        if (state_.count < handshake_protocol_.id.size())
+        if (state_.count < handshake_.id->size())
         {
-            rx_handshake.id.append(byte);
+            rx_handshake.id->push_back(byte);
         }
-        else if (state_.count == handshake_protocol.id.size())
+        else if (state_.count == handshake_.id->size())
         {
             /// reset the processing for now...
             reset();
@@ -158,9 +172,10 @@ Handshake::assembleHandshake(const std::byte byte, Handshake &rx_handshake)
     }
 }
 
-Handshake::reset()
+void HandshakeManager::reset()
 {
     state_.seq = HandshakeSeq::LEN_PREFIX;
     state_.count = 0;
 }
+}; /// namsepace peer
 }; /// namespace bittorrent

@@ -7,19 +7,31 @@
 
 namespace bittorrent
 {
+namespace peer
+{
 
-class HandshakeManager()
+class HandshakeManager
 {
 public:
     
-    using ByteBuffer = std::vector<const std::byte>;
+    using ByteBuffer = std::vector<std::byte>;
+    using PeerId = std::vector<std::byte>;
+    using ShaHash = std::vector<std::byte>;
     struct Handshake
     {
-        uint8_t prefix_length{19};
-        std::string protocol{"BitTorrent protocol"};
-        std::vector<const std::byte> reserved('\0x00', 8);
-        std::optional<ShaHash> info_hash{};
-        std::optional<PeerId> id{};
+        uint8_t prefix_length;
+        std::string protocol;
+        std::vector<std::byte> reserved;
+        std::optional<ShaHash> info_hash;
+        std::optional<PeerId> id;
+        
+        Handshake()
+            : prefix_length{19}
+            , protocol{"BitTorrent protocol"}
+            , reserved(8, static_cast<std::byte>('\0x00'))
+            , info_hash{}
+            , id{}
+        {}
     };
 
     /*
@@ -54,6 +66,11 @@ private:
     */
     void assembleHandshake(const std::byte byte, Handshake &rx_handshake);
 
+    /*
+    * \brief Resets the handshake assembly
+    */
+    void reset();
+
 private:
 
     enum class HandshakeSeq
@@ -78,8 +95,9 @@ private:
     State state_{};
 
     /// Handshake protocol to use
-    Handshake handshake_protocol_{};
+    Handshake handshake_{};
       
 }; /// class Handshake
+}; /// namesapce peer
 }; /// namespace bittorrent 
 #endif
