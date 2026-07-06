@@ -9,12 +9,11 @@ class FakeHandshake
 public:
     FakeHandshake()
     {
-        std::vector<std::byte> fake_bytes{
-            std::byte{0x01},
-            std::byte{0x02},
-            std::byte{0x03}};
-        handshake_.info_hash = fake_bytes;
-        handshake_.id.emplace(fake_bytes.rbegin(), fake_bytes.rend());
+        handshake_.info_hash.emplace();
+        handshake_.info_hash->fill(std::byte{0x13});
+
+        handshake_.id.emplace();
+        handshake_.id->fill(std::byte{0x01});
     };
 
     HandshakeManager::Handshake getHandshake() { return handshake_; };
@@ -60,7 +59,7 @@ TEST(HandshakeTests, SerializeDefaultHandshakeTest)
     /// Check the protocol type
     std::span<std::byte> span_buf{buffer};
     auto peak_payload = span_buf.subspan(1, protocol_ver.size());
-    for (const auto &[actual, expected] : std::views::zip(peak_payload, protocol_ver))
+    for (const auto [actual, expected] : std::views::zip(peak_payload, protocol_ver))
     {
         ASSERT_EQ(actual, expected) << "Protocol version does not match";
     }
@@ -68,7 +67,7 @@ TEST(HandshakeTests, SerializeDefaultHandshakeTest)
     /// Check the reserved bytes
     span_buf = span_buf.subspan(protocol_ver.size() + 1);
     peak_payload = span_buf.subspan(0, 8);
-    for (const auto &[actual, expected] : std::views::zip(peak_payload, handshake.reserved))
+    for (const auto [actual, expected] : std::views::zip(peak_payload, handshake.reserved))
     {
         ASSERT_EQ(actual, expected) << "Reserved bytes don't match";
     }
@@ -76,7 +75,7 @@ TEST(HandshakeTests, SerializeDefaultHandshakeTest)
     /// Check the hash
     span_buf = span_buf.subspan(8);
     peak_payload = span_buf.subspan(0, handshake.info_hash->size());
-    for (const auto &[actual, expected] : std::views::zip(peak_payload, *handshake.info_hash))
+    for (const auto [actual, expected] : std::views::zip(peak_payload, *handshake.info_hash))
     {
         ASSERT_EQ(actual, expected) << "Info hash bytes don't match";
     }
@@ -89,3 +88,38 @@ TEST(HandshakeTests, SerializeDefaultHandshakeTest)
         ASSERT_EQ(actual, expected) << "ID bytes do not match";
     }
 } 
+
+
+TEST(HandshakeTests, DeserialHandshakeTest)
+{
+    using namespace bittorrent::peer;
+    HandshakeManager manager{};
+    FakeHandshake fake_handshake{};
+
+    /// Do the fun stuff
+    manager.setProtocol(fake_handshake.getHandshake());
+    const auto serialized_buffer = manager.serialize();
+
+    /// Deserialize buffer
+    const auto rx_handshake = manager.deserialize(serialized_buffer);
+    
+    /// Assertions
+    const  auto tx_handshake = fake_handshake.getHandshake();
+    ASSERT_EQ(rx_handshake.prefix_length, tx_handshake.prefix_length) << "Prefix length mismatch";
+    ASSERT_EQ(rx_handshake.protocol, tx_handshake.protocol) << "Protocol version mismatch";
+    
+    for (const auto [actual, expected] : std::views::zip(rx_handshake.reserved, tx_handshake.reserved))
+    {
+        ASSERT_EQ(actual, expected) << "Reserved bytes mismatch";
+    }
+
+    for (const auto [actual, expected] : std::views::zip(*rx_handshake.info_hash, *tx_handshake.info_hash))
+    {
+        ASSERT_EQ(actual, expected) << "Info hash mismatch";
+    }
+
+    for (const auto [actual, expected] : std::views::zip(*rx_handshake.id, *rx_handshake.id))
+    {
+        ASSERT_EQ(actual, expected) << "Id mismatch";
+    }
+}
