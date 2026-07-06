@@ -1,6 +1,7 @@
 #include <cstddef>
 #include <algorithm>
 #include <peer/HandshakeManager.hpp>
+#include <iostream>
 
 namespace bittorrent
 {
@@ -57,7 +58,10 @@ HandshakeManager::ByteBuffer HandshakeManager::serialize()
 
 HandshakeManager::Handshake HandshakeManager::deserialize(const std::span<const std::byte> &message)
 {
-    Handshake rx_handshake{};
+    /// Build up an empty handshake
+    Handshake rx_handshake;
+    rx_handshake.reset();
+
     for (const auto byte : message)
     {
         assembleHandshake(byte, rx_handshake);
@@ -75,7 +79,7 @@ void HandshakeManager::assembleHandshake(const std::byte byte, Handshake &rx_han
 
     case LEN_PREFIX:
     {
-        if (byte != static_cast<std::byte>(LEN_PREFIX))
+        if (byte != static_cast<std::byte>(handshake_.prefix_length))
         {
             reset();
             throw std::runtime_error("Malformed header: prefix length");
@@ -91,7 +95,7 @@ void HandshakeManager::assembleHandshake(const std::byte byte, Handshake &rx_han
 
         /// Did we get all our data?
         if (rx_handshake.protocol.size() == rx_handshake.prefix_length &&
-            rx_handshake.protocol == handshake_.protocol.data())
+            rx_handshake.protocol == handshake_.protocol)
         {
             /// Next state
             state_.seq = PADDING;
@@ -105,66 +109,90 @@ void HandshakeManager::assembleHandshake(const std::byte byte, Handshake &rx_han
     }
     case PADDING:
     {
-        ++state_.count;
+        rx_handshake.reserved.push_back(byte);
 
         /// Ensure we are checking custom protocols
-        if (handshake_.reserved.size() < state_.count ||
-            handshake_.reserved[state_.count] != byte)
+        if (handshake_.reserved[state_.count] != byte)
         {
             reset();
-            throw std::runtime_error("Malformed packet: padded byte protocol not supported");
+            throw std::runtime_error("Malformed packet: invalid padded byte");
         }
-        else if (handshake_.reserved.size() == state_.count)
+        else if (handshake_.reserved.size() < rx_handshake.reserved.size())
+        {
+            reset();
+            throw std::runtime_error("Malformed packet: padded byte length exceeded");
+        }
+        else if (rx_handshake.reserved.size() == handshake_.reserved.size())
         {
             /// Move onto the next state
             state_.seq = INFO_HASH;
             state_.count = 0;
+            break;
         }
+
+        ++state_.count;
         break;
     }
     case INFO_HASH:
     {
-        ++state_.count;
         if (!rx_handshake.info_hash)
         {
             /// Init the optional
             rx_handshake.info_hash.emplace();
         }
 
-        rx_handshake.info_hash->push_back(byte);
+        if (rx_handshake.info_hash->size() < state_.count)
+        {
+            reset();
+            throw std::runtime_error("Malformed packet: info hash length exceeded");
+        }
+        (*rx_handshake.info_hash)[state_.count] = byte;
 
-        if (!handshake_.info_hash.has_value())
+        /// Make sure transmit set the info hash
+        if (!handshake_.info_hash)
         {
             reset();
             throw std::runtime_error("Info hash never set! Cannot compare an unknown info hash!");
+        }
+        else if (byte != (*handshake_.info_hash)[state_.count])
+        {
+            reset();
+            throw std::runtime_error("Malformed packet: invalid info hash byte");
         }
         else if(state_.count == handshake_.info_hash->size())
         {
             /// Move onto the next state
             state_.seq = ID;
             state_.count = 0;
+            break;
         }
+        
+        ++state_.count;
         break;
     }
     case ID:
     {
-        ++state_.count;
-        if (!handshake_.id)
+        if (!rx_handshake.id)
         {
             /// Init the optional 
-            handshake_.id.emplace();
+            rx_handshake.id.emplace();
         }
 
-        /// For the current implementation, ID's are 20 bytes long
-        if (state_.count < handshake_.id->size())
+        if (rx_handshake.id->size() < state_.count)
         {
-            rx_handshake.id->push_back(byte);
-        }
-        else if (state_.count == handshake_.id->size())
-        {
-            /// reset the processing for now...
             reset();
+            throw std::runtime_error("Malformed packet: id length exceeded");
         }
+        (*rx_handshake.id)[state_.count] = byte;
+
+        /// For the current implementation, ID's are 20 bytes long
+        if (state_.count == handshake_.id->size())
+        {
+            /// Handshake completed
+            break;
+        }
+
+        ++state_.count;
         break;
     }
     default:

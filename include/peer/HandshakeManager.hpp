@@ -15,8 +15,8 @@ class HandshakeManager
 public:
     
     using ByteBuffer = std::vector<std::byte>;
-    using PeerId = std::vector<std::byte>;
-    using ShaHash = std::vector<std::byte>;
+    using PeerId = std::array<std::byte, 20>;
+    using ShaHash = std::array<std::byte, 20>;
     struct Handshake
     {
         uint8_t prefix_length;
@@ -32,6 +32,15 @@ public:
             , info_hash{}
             , id{}
         {}
+
+        void reset()
+        {
+            prefix_length = 0;
+            protocol = "";
+            reserved.clear();
+            info_hash.reset();
+            id.reset();
+        }
     };
 
     /*
@@ -56,6 +65,11 @@ public:
     *
     */
     void setProtocol(Handshake &&handshake);
+
+    /*
+    * TODO:
+    */
+    void setEncoder();
 
 private:
 
