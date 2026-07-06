@@ -39,7 +39,7 @@ TEST(HandshakeTests, SerializeDefaultHandshakeTest)
     auto buffer = manager.serialize();
 
     /// Thing to check
-    HandshakeManager::Handshake handshake{};
+    auto handshake = fake_handshake.getHandshake();
     ASSERT_FALSE(buffer.empty());
 
     /// Make sure first byte is the length
@@ -57,9 +57,35 @@ TEST(HandshakeTests, SerializeDefaultHandshakeTest)
             return static_cast<std::byte>(c);
         });
 
-    auto buffered_protocol = std::span(buffer).subspan(1, protocol_ver.size());
-    for (const auto &[actual, expected] : std::views::zip(buffered_protocol, protocol_ver))
+    /// Check the protocol type
+    std::span<std::byte> span_buf{buffer};
+    auto peak_payload = span_buf.subspan(1, protocol_ver.size());
+    for (const auto &[actual, expected] : std::views::zip(peak_payload, protocol_ver))
     {
-        ASSERT_EQ(actual, expected);
+        ASSERT_EQ(actual, expected) << "Protocol version does not match";
+    }
+
+    /// Check the reserved bytes
+    span_buf = span_buf.subspan(protocol_ver.size() + 1);
+    peak_payload = span_buf.subspan(0, 8);
+    for (const auto &[actual, expected] : std::views::zip(peak_payload, handshake.reserved))
+    {
+        ASSERT_EQ(actual, expected) << "Reserved bytes don't match";
+    }
+
+    /// Check the hash
+    span_buf = span_buf.subspan(8);
+    peak_payload = span_buf.subspan(0, handshake.info_hash->size());
+    for (const auto &[actual, expected] : std::views::zip(peak_payload, *handshake.info_hash))
+    {
+        ASSERT_EQ(actual, expected) << "Info hash bytes don't match";
+    }
+
+    /// Check the id
+    span_buf = span_buf.subspan(handshake.info_hash->size());
+    peak_payload = span_buf.subspan(0, handshake.id->size());
+    for (const auto &[actual, expected] : std::views::zip(peak_payload, *handshake.id))
+    {
+        ASSERT_EQ(actual, expected) << "ID bytes do not match";
     }
 } 
